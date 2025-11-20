@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from 'src/common/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -12,6 +12,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { join } from 'path';
 import { UserModule } from './modules/user/user.module';
 import { GqlThrottlerGuard } from './common/guard/gql-throttler.guard';
+import { ConcertsModule } from './modules/concerts/concerts.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { GqlThrottlerGuard } from './common/guard/gql-throttler.guard';
     PrismaModule,
     AuthModule,
     UserModule,
+    ConcertsModule,
   ],
   controllers: [AppController],
   providers: [
