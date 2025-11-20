@@ -1,0 +1,24 @@
+enum RoleType {
+  ADMIN
+  USER
+}
+
+input RegisterInput {
+  username: String!
+  email: String!
+  password: String!
+  roles: [RoleType!]!
+}
+
+type RegisterResponse {
+  status: Boolean!
+  message: String!
+}
+
+type Query {
+  _: Boolean
+}
+
+type Mutation {
+  register(input: RegisterInput!): RegisterResponse!
+}

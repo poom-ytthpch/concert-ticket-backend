@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import helmet from 'helmet';
 import { json } from 'express';
 import { ConsoleLogger, ValidationPipe } from '@nestjs/common';
+import { GqlExceptionFilter } from './common/graphql/graphql-exception.filter';
 
 async function bootstrap() {
   const port = process.env.PORT || 3000;
@@ -15,11 +16,13 @@ async function bootstrap() {
     }),
   });
 
-  app.use(helmet());
   app.use(json({ limit: '50mb' }));
+
+  app.useGlobalFilters(new GqlExceptionFilter());
 
   app.use(
     helmet({
+      crossOriginEmbedderPolicy: false,
       contentSecurityPolicy:
         process.env.NODE_ENV === 'production'
           ? {

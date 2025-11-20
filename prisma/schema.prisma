@@ -7,14 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum RoleType {
+  ROOT
+  ADMIN
+  USER
+}
+
 model User {
   id           String        @id @default(uuid())
   username     String        @unique
   email        String        @unique
   password     String
-  role         Role          @default(USER)
   reservations Reservation[]
   createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  roles        Role[]
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  type      RoleType
+  createdAt DateTime
+  updatedAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
 }
 
 model Concert {
@@ -38,11 +54,6 @@ model Reservation {
   status      ReservationStatus @default(RESERVED)
   createdAt   DateTime          @default(now())
   cancelledAt DateTime?
-}
-
-enum Role {
-  ADMIN
-  USER
 }
 
 enum ReservationStatus {

@@ -4,7 +4,13 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { PrismaModule } from 'common/prisma/prisma.module';
+import { PrismaModule } from 'src/common/prisma/prisma.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { join } from 'path';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -23,7 +29,31 @@ import { PrismaModule } from 'common/prisma/prisma.module';
         ],
       }),
     }),
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        typePaths: ['./**/**/*.graphql'],
+        definitions: {
+          path: join(process.cwd(), 'src/types/gql.ts'),
+          outputAs: 'class',
+        },
+        csrfPrevention: false, // see below for more about this
+        installSubscriptionHandlers: false,
+        cors: false,
+        playground: false,
+        skipCheck: true,
+        validate: false,
+
+        introspection:
+          configService.get<string>('NODE_ENV') !== 'production' ? true : false,
+        context: ({ req }) => ({ request: req }),
+        plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
+      }),
+    }),
     PrismaModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [

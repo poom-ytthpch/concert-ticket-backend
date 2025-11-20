@@ -1,0 +1,4 @@
+type CommonResponse {
+  status: Boolean!
+  message: String!
+}
