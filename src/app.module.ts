@@ -11,6 +11,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { join } from 'path';
 import { UserModule } from './modules/user/user.module';
+import { GqlThrottlerGuard } from './common/guard/gql-throttler.guard';
 
 @Module({
   imports: [
@@ -38,16 +39,15 @@ import { UserModule } from './modules/user/user.module';
           path: join(process.cwd(), 'src/types/gql.ts'),
           outputAs: 'class',
         },
-        csrfPrevention: false, // see below for more about this
+        csrfPrevention: false,
         installSubscriptionHandlers: false,
         cors: false,
         playground: false,
         skipCheck: true,
         validate: false,
-
         introspection:
           configService.get<string>('NODE_ENV') !== 'production' ? true : false,
-        context: ({ req }) => ({ request: req }),
+        context: ({ req, res }) => ({ req, res }),
         plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
       }),
     }),
@@ -60,7 +60,7 @@ import { UserModule } from './modules/user/user.module';
     AppService,
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: GqlThrottlerGuard,
     },
   ],
 })

@@ -35,6 +35,9 @@ export class UserService {
         where: {
           email: email,
         },
+        include: {
+          roles: true,
+        },
       });
     } catch (error) {
       throw new HttpException(error.message, error.status);

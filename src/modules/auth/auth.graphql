@@ -15,10 +15,22 @@ type RegisterResponse {
   message: String!
 }
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type LoginResponse {
+  status: Boolean!
+  message: String!
+  token: String
+}
+
 type Query {
   _: Boolean
 }
 
 type Mutation {
   register(input: RegisterInput!): RegisterResponse!
+  login(input: LoginInput!): LoginResponse!
 }

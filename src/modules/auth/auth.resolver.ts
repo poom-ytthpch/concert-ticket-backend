@@ -16,4 +16,10 @@ export class AuthResolver {
   register(@Args('input') input: RegisterInput): Promise<RegisterResponse> {
     return this.authService.register(input);
   }
+
+  @Roles(RoleType.USER, RoleType.ADMIN, RoleType.ROOT)
+  @Mutation('login')
+  login(@Args('input') input: RegisterInput): Promise<RegisterResponse> {
+    return this.authService.login(input);
+  }
 }
