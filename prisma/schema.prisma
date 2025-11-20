@@ -22,6 +22,7 @@ model User {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   roles        Role[]
+  activityLogs ActivityLog[]
 }
 
 model Role {
@@ -41,6 +42,7 @@ model Concert {
   seatsAvailable Int
   reservations   Reservation[]
   createdAt      DateTime      @default(now())
+  activityLogs   ActivityLog[]
 
   @@index([name])
 }
@@ -59,4 +61,14 @@ model Reservation {
 enum ReservationStatus {
   RESERVED
   CANCELLED
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  concert   Concert? @relation(fields: [concertId], references: [id])
+  concertId String?
+  action    String
+  createdAt DateTime @default(now())
 }
