@@ -28,4 +28,16 @@ export class UserService {
       throw new HttpException(error.message, error.status);
     }
   }
+
+  async findByEmail(email: string) {
+    try {
+      return await this.repos.user.findUnique({
+        where: {
+          email: email,
+        },
+      });
+    } catch (error) {
+      throw new HttpException(error.message, error.status);
+    }
+  }
 }
