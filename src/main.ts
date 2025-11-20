@@ -14,7 +14,7 @@ async function bootstrap() {
       logLevels: ['log', 'error', 'warn', 'debug', 'verbose'],
     }),
   });
-  
+
   app.use(helmet());
   app.use(json({ limit: '50mb' }));
 
