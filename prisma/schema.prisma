@@ -21,7 +21,7 @@ enum ReservationStatus {
   CANCELLED
 }
 
-enum ActivityLogStatus {
+enum ActivityLogAction {
   RESERVE
   CANCEL
 }
@@ -85,7 +85,7 @@ model ActivityLog {
   userId    String?
   concert   Concert?          @relation(fields: [concertId], references: [id])
   concertId String?
-  action    ActivityLogStatus
+  action    ActivityLogAction
   createdAt DateTime          @default(now())
 
   @@index([userId])
