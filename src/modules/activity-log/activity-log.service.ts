@@ -1,4 +1,4 @@
-import { PrismaService } from '@/common/prisma/prisma.service';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { CreateActivityLogDto } from './dto/activity-log.dto';
 

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReservationsService } from './reservations.service';
-import { PrismaService } from '../..//common/prisma/prisma.service';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { getQueueToken } from '@nestjs/bullmq';
 import { HttpException } from '@nestjs/common';
 import { ReservationStatus } from '@prisma/client';
@@ -30,6 +30,10 @@ describe('ReservationsService', () => {
         },
         {
           provide: getQueueToken('reservations'),
+          useValue: mockBullQueue,
+        },
+        {
+          provide: getQueueToken('activityLog'),
           useValue: mockBullQueue,
         },
       ],
@@ -182,6 +186,112 @@ describe('ReservationsService', () => {
       mockPrismaService.reservation.update.mockResolvedValue(undefined);
 
       await expect(service.updateStatus(mockUpdate)).resolves.toBe(undefined);
+    });
+  });
+
+  describe('cancel', () => {
+    it('should throw HttpException when prisma error occurs', async () => {
+      const mockInput = {
+        userId: '1',
+        concertId: '1',
+      };
+
+      jest
+        .spyOn(mockPrismaService.reservation, 'update')
+        .mockRejectedValue(new Error('DB error'));
+
+      await expect(service.cancel(mockInput)).rejects.toBeInstanceOf(
+        HttpException,
+      );
+
+      await expect(service.cancel(mockInput)).rejects.toThrow('DB error');
+    });
+
+    it('should update status', async () => {
+      const mockInput = {
+        userId: '1',
+        concertId: '1',
+      };
+
+      jest.spyOn(service, 'findOneByUserConId').mockResolvedValue(null);
+
+      mockBullQueue.add.mockResolvedValue(undefined);
+
+      await expect(service.cancel(mockInput)).rejects.toBeInstanceOf(
+        HttpException,
+      );
+
+      await expect(service.cancel(mockInput)).rejects.toThrow(
+        'Reservation not found',
+      );
+    });
+
+    it('should cancel reservation when found', async () => {
+      const mockInput = {
+        userId: '1',
+        concertId: '1',
+      };
+
+      const mockReservation = {
+        id: 'res1',
+        userId: '1',
+        concertId: '1',
+        status: 'pending',
+      };
+
+      jest
+        .spyOn(service, 'findOneByUserConId')
+        .mockResolvedValue(mockReservation as any);
+
+      mockBullQueue.add.mockResolvedValue(undefined);
+
+      const result = await service.cancel(mockInput as any);
+
+      expect(result).toEqual({
+        status: true,
+        message: 'Reservation cancelled successfully',
+      });
+
+      expect(mockBullQueue.add).toHaveBeenCalledTimes(4);
+
+      expect(mockBullQueue.add.mock.calls[0]).toEqual([
+        'reserve-seat',
+        { reservationId: '1', concertId: '1' },
+      ]);
+
+      expect(mockBullQueue.add.mock.calls[1][0]).toBe('create-activity-log');
+      expect(mockBullQueue.add.mock.calls[1][1]).toMatchObject({
+        userId: '1',
+        concertId: '1',
+        action: expect.any(String),
+      });
+    });
+
+    it('should throw HttpException when queue add fails', async () => {
+      const mockInput = {
+        userId: '1',
+        concertId: '1',
+      };
+
+      const mockReservation = {
+        id: 'res1',
+        userId: '1',
+        concertId: '1',
+      };
+
+      jest
+        .spyOn(service, 'findOneByUserConId')
+        .mockResolvedValue(mockReservation as any);
+
+      mockBullQueue.add.mockRejectedValue(new Error('Queue error'));
+
+      await expect(service.cancel(mockInput as any)).rejects.toBeInstanceOf(
+        HttpException,
+      );
+
+      await expect(service.cancel(mockInput as any)).rejects.toThrow(
+        'Queue error',
+      );
     });
   });
 });
