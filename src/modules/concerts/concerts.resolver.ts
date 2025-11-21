@@ -20,4 +20,11 @@ export class ConcertsResolver {
   ) {
     return this.concertsService.create(input, ctx);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleType.ADMIN)
+  @Mutation('deleteConcert')
+  deleteConcert(@Args('id') id: string, ctx: GqlContext) {
+    return this.concertsService.delete(id, ctx);
+  }
 }

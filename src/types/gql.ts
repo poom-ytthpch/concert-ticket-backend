@@ -59,6 +59,8 @@ export abstract class IMutation {
     abstract login(input: LoginInput): LoginResponse | Promise<LoginResponse>;
 
     abstract createConcert(input: CreateConcertInput): CreateConcertResponse | Promise<CreateConcertResponse>;
+
+    abstract deleteConcert(id: string): boolean | Promise<boolean>;
 }
 
 export class Concert {

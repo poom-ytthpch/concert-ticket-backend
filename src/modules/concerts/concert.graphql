@@ -25,4 +25,5 @@ type CreateConcertResponse {
 
 type Mutation {
   createConcert(input: CreateConcertInput!): CreateConcertResponse!
+  deleteConcert(id: String!): Boolean!
 }
