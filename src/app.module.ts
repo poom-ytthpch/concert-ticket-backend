@@ -65,7 +65,16 @@ import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
         },
       }),
     }),
-    CacheModule.register(),
+    CacheModule.registerAsync({
+      inject: [ConfigService],
+      isGlobal: true,
+      useFactory: (configService: ConfigService) => ({
+        store: 'redis',
+        host: configService.get<string>('REDIS_HOST') || 'localhost',
+        port: configService.get<number>('REDIS_PORT') || 6379,
+        ttl: configService.get<number>('CACHE_TTL') || 5000,
+      }),
+    }),
     PrismaModule,
     AuthModule,
     UserModule,
