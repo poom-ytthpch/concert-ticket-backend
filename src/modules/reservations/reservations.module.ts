@@ -1,8 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { ReservationsResolver } from './reservations.resolver';
+import { BullModule } from '@nestjs/bullmq';
+import { ReservationsProcessor } from './reservations.processor';
+import { PrismaService } from '@/common/prisma/prisma.service';
 
 @Module({
-  providers: [ReservationsResolver, ReservationsService],
+  imports: [
+    BullModule.registerQueue({
+      name: 'reservations',
+    }),
+  ],
+  providers: [ReservationsResolver, ReservationsService, ReservationsProcessor, PrismaService],
 })
 export class ReservationsModule {}

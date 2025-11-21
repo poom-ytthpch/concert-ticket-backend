@@ -14,6 +14,7 @@ import { UserModule } from './modules/user/user.module';
 import { GqlThrottlerGuard } from './common/guard/gql-throttler.guard';
 import { ConcertsModule } from './modules/concerts/concerts.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -52,6 +53,12 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
         context: ({ req, res }) => ({ req, res }),
         plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
       }),
+    }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
     }),
     PrismaModule,
     AuthModule,
