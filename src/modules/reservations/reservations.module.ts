@@ -8,9 +8,14 @@ import { ConcertsService } from '../concerts/concerts.service';
 
 @Module({
   imports: [
-    BullModule.registerQueue({
-      name: 'reservations',
-    }),
+    BullModule.registerQueue(
+      {
+        name: 'reservations',
+      },
+      {
+        name: 'activityLog',
+      },
+    ),
   ],
   providers: [
     ReservationsResolver,

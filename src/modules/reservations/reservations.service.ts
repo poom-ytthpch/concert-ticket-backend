@@ -1,5 +1,10 @@
 import { PrismaService } from '../..//common/prisma/prisma.service';
-import { ReserveInput, ReserveResponse } from '@/types/gql';
+import {
+  CancelInput,
+  Cancelresponse,
+  ReserveInput,
+  ReserveResponse,
+} from '@/types/gql';
 import { InjectQueue } from '@nestjs/bullmq';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ActivityLogAction, Reservation } from '@prisma/client';
@@ -97,6 +102,33 @@ export class ReservationsService {
           status: input.status,
         },
       });
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async cancel(input: CancelInput): Promise<Cancelresponse> {
+    try {
+      const isReservationExist = await this.findOneByUserConId(
+        input.userId,
+        input.concertId,
+      );
+
+      if (!isReservationExist) {
+        throw new HttpException('Reservation not found', 404);
+      }
+
+      await this.activityLogQueue.add('create-activity-log', {
+        userId: input.userId,
+        concertId: input.concertId,
+        action: ActivityLogAction.CANCEL,
+      });
+
+      return {
+        status: true,
+        message: 'Reservation cancelled successfully',
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(error.message, error.status);

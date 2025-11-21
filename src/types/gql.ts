@@ -38,6 +38,11 @@ export class ReserveInput {
     concertId: string;
 }
 
+export class CancelInput {
+    userId: string;
+    concertId: string;
+}
+
 export class CommonResponse {
     status: boolean;
     message: string;
@@ -67,7 +72,9 @@ export abstract class IMutation {
 
     abstract deleteConcert(id: string): boolean | Promise<boolean>;
 
-    abstract reserve(input?: Nullable<ReserveInput>): Nullable<boolean> | Promise<Nullable<boolean>>;
+    abstract reserve(input: ReserveInput): ReserveResponse | Promise<ReserveResponse>;
+
+    abstract cancel(input: CancelInput): Cancelresponse | Promise<Cancelresponse>;
 }
 
 export class Concert {
@@ -86,6 +93,11 @@ export class CreateConcertResponse {
 }
 
 export class ReserveResponse {
+    status: boolean;
+    message: string;
+}
+
+export class Cancelresponse {
     status: boolean;
     message: string;
 }

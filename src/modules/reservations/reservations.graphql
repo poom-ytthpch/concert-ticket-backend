@@ -8,6 +8,17 @@ type ReserveResponse {
   message: String!
 }
 
+input CancelInput {
+  userId: String!
+  concertId: String!
+}
+
+type Cancelresponse {
+  status: Boolean!
+  message: String!
+}
+
 type Mutation {
-  reserve(input: ReserveInput): Boolean
+  reserve(input: ReserveInput!): ReserveResponse!
+  cancel(input: CancelInput!): Cancelresponse!
 }
