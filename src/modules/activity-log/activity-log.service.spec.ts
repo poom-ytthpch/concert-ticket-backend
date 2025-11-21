@@ -4,20 +4,30 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { getQueueToken } from '@nestjs/bullmq';
 import { ActivityLogAction } from '@prisma/client';
 import { HttpException } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('ActivityLogService', () => {
+  let cache: Cache;
+
   let service: ActivityLogService;
   let mockPrismaService = {
     activityLog: {
       create: jest.fn(),
       delete: jest.fn(),
       findUnique: jest.fn(),
+      findMany: jest.fn(),
     },
   };
 
   const mockBullQueue: any = {
     add: jest.fn(),
     process: jest.fn(),
+  };
+
+  let mockCacheManager: any = {
+    get: jest.fn(),
+    set: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -31,6 +41,10 @@ describe('ActivityLogService', () => {
         {
           provide: getQueueToken('activityLog'),
           useValue: mockBullQueue,
+        },
+        {
+          provide: CACHE_MANAGER,
+          useValue: mockCacheManager,
         },
       ],
     }).compile();
@@ -81,6 +95,81 @@ describe('ActivityLogService', () => {
       );
 
       await expect(service.create(mockCreate)).rejects.toThrow('DB error');
+    });
+
+    beforeEach(() => {
+      mockPrismaService.activityLog.findMany = jest.fn();
+    });
+
+    describe('findAll', () => {
+      it('should return cached activity logs when cache hit', async () => {
+        const ctx = { req: { user: { id: '1' } } } as any;
+        const input = { take: 5, skip: 0 } as any;
+
+        const cached = [
+          {
+            createdAt: new Date(),
+            user: { username: 'alice' },
+            concert: { name: 'Gig' },
+          },
+        ];
+
+        mockCacheManager.get.mockResolvedValueOnce(cached);
+
+        const result = await service.findAll(input, ctx);
+
+        expect(result).toEqual(cached);
+        expect(mockPrismaService.activityLog.findMany).not.toHaveBeenCalled();
+      });
+
+      it('should fetch from db and set cache when cache miss', async () => {
+        const ctx = { req: { user: { id: '1' } } } as any;
+        const input = { take: 5, skip: 0 } as any;
+
+        const dbResult = [
+          {
+            createdAt: new Date(),
+            user: { username: 'bob' },
+            concert: { name: 'Festival' },
+          },
+        ];
+
+        mockCacheManager.get.mockResolvedValueOnce(null);
+        mockPrismaService.activityLog.findMany.mockResolvedValueOnce(dbResult);
+
+        const result = await service.findAll(input, ctx);
+
+        expect(result).toEqual(dbResult);
+        expect(mockPrismaService.activityLog.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: { userId: '1' },
+            select: expect.any(Object),
+            orderBy: { createdAt: 'desc' },
+            take: 5,
+            skip: 0,
+          }),
+        );
+        expect(mockCacheManager.set).toHaveBeenCalledWith(
+          `activity_logs:1:take=5:skip=0`,
+          dbResult,
+        );
+      });
+
+      it('should throw HttpException when prisma findMany throws', async () => {
+        const ctx = { req: { user: { id: '1' } } } as any;
+        const input = { take: 5, skip: 0 } as any;
+
+        mockCacheManager.get.mockResolvedValueOnce(null);
+
+        jest
+          .spyOn(mockPrismaService.activityLog, 'findMany')
+          .mockRejectedValue(new Error('DB error'));
+
+        await expect(service.findAll(input, ctx)).rejects.toBeInstanceOf(
+          HttpException,
+        );
+        await expect(service.findAll(input, ctx)).rejects.toThrow('DB error');
+      });
     });
   });
 });
