@@ -33,6 +33,11 @@ export class CreateConcertInput {
     createdAt?: Nullable<Date>;
 }
 
+export class ReserveInput {
+    userId: string;
+    concertId: string;
+}
+
 export class CommonResponse {
     status: boolean;
     message: string;
@@ -61,6 +66,8 @@ export abstract class IMutation {
     abstract createConcert(input: CreateConcertInput): CreateConcertResponse | Promise<CreateConcertResponse>;
 
     abstract deleteConcert(id: string): boolean | Promise<boolean>;
+
+    abstract reserve(input?: Nullable<ReserveInput>): Nullable<boolean> | Promise<Nullable<boolean>>;
 }
 
 export class Concert {
@@ -76,6 +83,11 @@ export class CreateConcertResponse {
     data?: Nullable<Concert>;
     status?: Nullable<boolean>;
     message?: Nullable<string>;
+}
+
+export class ReserveResponse {
+    status: boolean;
+    message: string;
 }
 
 type Nullable<T> = T | null;

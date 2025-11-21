@@ -4,6 +4,7 @@ import { ReservationsResolver } from './reservations.resolver';
 import { BullModule } from '@nestjs/bullmq';
 import { ReservationsProcessor } from './reservations.processor';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { ConcertsService } from '../concerts/concerts.service';
 
 @Module({
   imports: [
@@ -11,6 +12,12 @@ import { PrismaService } from '@/common/prisma/prisma.service';
       name: 'reservations',
     }),
   ],
-  providers: [ReservationsResolver, ReservationsService, ReservationsProcessor, PrismaService],
+  providers: [
+    ReservationsResolver,
+    ReservationsService,
+    ReservationsProcessor,
+    PrismaService,
+    ConcertsService,
+  ],
 })
 export class ReservationsModule {}

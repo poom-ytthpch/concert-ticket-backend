@@ -1,0 +1,13 @@
+input ReserveInput {
+  userId: String!
+  concertId: String!
+}
+
+type ReserveResponse {
+  status: Boolean!
+  message: String!
+}
+
+type Mutation {
+  reserve(input: ReserveInput): Boolean
+}
