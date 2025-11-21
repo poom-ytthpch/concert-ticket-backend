@@ -2,7 +2,7 @@ import { PrismaService } from '../..//common/prisma/prisma.service';
 import { ReserveInput, ReserveResponse } from '@/types/gql';
 import { InjectQueue } from '@nestjs/bullmq';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { Reservation } from '@prisma/client';
+import { ActivityLogAction, Reservation } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { UpdateReservationStatusDto } from './dto/reservations.dto';
 
@@ -13,6 +13,7 @@ export class ReservationsService {
   constructor(
     private readonly repos: PrismaService,
     @InjectQueue('reservations') private reservationQueue: Queue,
+    @InjectQueue('activityLog') private activityLogQueue: Queue,
   ) {}
 
   async findOneByUserConId(userId: string, conId: string) {
@@ -50,6 +51,12 @@ export class ReservationsService {
       await this.reservationQueue.add('reserve-seat', {
         reservationId: reservation.id,
         concertId: reservation.concertId,
+      });
+
+      await this.activityLogQueue.add('create-activity-log', {
+        userId: reservation.userId,
+        concertId: reservation.concertId,
+        action: ActivityLogAction.RESERVE,
       });
 
       return {
