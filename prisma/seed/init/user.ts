@@ -25,16 +25,40 @@ export async function seedUserData(
 
     const hash = await bcrypt.hash(userData.password, 10);
 
-    await prisma.user.create({
-      data: {
+    const isUserExist = await prisma.user.findUnique({
+      where: {
         email: userData.email,
-        username: userData.username,
-        password: hash,
-        roles: {
-          createMany: roleCreate,
-        },
       },
     });
+
+    if (isUserExist) {
+      await prisma.user.update({
+        where: {
+          id: isUserExist.id,
+        },
+        data: {
+          email: userData.email,
+          username: userData.username,
+          createdBy: 'system',
+          roles: {
+            deleteMany: {},
+            createMany: roleCreate,
+          },
+        },
+      });
+    } else {
+      await prisma.user.create({
+        data: {
+          email: userData.email,
+          username: userData.username,
+          password: hash,
+          createdBy: 'system',
+          roles: {
+            createMany: roleCreate,
+          },
+        },
+      });
+    }
   }
 
   console.log('User data seeded.');

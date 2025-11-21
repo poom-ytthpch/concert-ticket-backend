@@ -23,6 +23,7 @@ model User {
   updatedAt    DateTime      @updatedAt
   roles        Role[]
   activityLogs ActivityLog[]
+  createdBy    String?
 }
 
 model Role {
@@ -43,6 +44,9 @@ model Concert {
   reservations   Reservation[]
   createdAt      DateTime      @default(now())
   activityLogs   ActivityLog[]
+  createdBy      String?
+  updatedAt      DateTime?
+  updateBy       String?
 
   @@index([name])
 }
