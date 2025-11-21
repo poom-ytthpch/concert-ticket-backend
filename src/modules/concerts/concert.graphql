@@ -1,0 +1,28 @@
+scalar Date
+
+type Concert {
+  id: String!
+  name: String
+  description: String
+  totalSeats: Int
+  seatsAvailable: Int
+  createdAt: Date
+}
+
+input CreateConcertInput {
+  name: String!
+  description: String
+  totalSeats: Int!
+  seatsAvailable: Int!
+  createdAt: Date
+}
+
+type CreateConcertResponse {
+  data: Concert
+  status: Boolean
+  message: String
+}
+
+type Mutation {
+  createConcert(input: CreateConcertInput!): CreateConcertResponse!
+}

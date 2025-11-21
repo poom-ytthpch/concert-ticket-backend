@@ -25,6 +25,14 @@ export class LoginInput {
     password: string;
 }
 
+export class CreateConcertInput {
+    name: string;
+    description?: Nullable<string>;
+    totalSeats: number;
+    seatsAvailable: number;
+    createdAt?: Nullable<Date>;
+}
+
 export class CommonResponse {
     status: boolean;
     message: string;
@@ -49,6 +57,23 @@ export abstract class IMutation {
     abstract register(input: RegisterInput): RegisterResponse | Promise<RegisterResponse>;
 
     abstract login(input: LoginInput): LoginResponse | Promise<LoginResponse>;
+
+    abstract createConcert(input: CreateConcertInput): CreateConcertResponse | Promise<CreateConcertResponse>;
+}
+
+export class Concert {
+    id: string;
+    name?: Nullable<string>;
+    description?: Nullable<string>;
+    totalSeats?: Nullable<number>;
+    seatsAvailable?: Nullable<number>;
+    createdAt?: Nullable<Date>;
+}
+
+export class CreateConcertResponse {
+    data?: Nullable<Concert>;
+    status?: Nullable<boolean>;
+    message?: Nullable<string>;
 }
 
 type Nullable<T> = T | null;
