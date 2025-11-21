@@ -21,6 +21,11 @@ enum ReservationStatus {
   CANCELLED
 }
 
+enum ActivityLogStatus {
+  RESERVE
+  CANCEL
+}
+
 model User {
   id           String        @id @default(uuid())
   username     String        @unique
@@ -75,11 +80,13 @@ model Reservation {
 }
 
 model ActivityLog {
-  id        String   @id @default(uuid())
-  user      User?    @relation(fields: [userId], references: [id])
+  id        String            @id @default(uuid())
+  user      User?             @relation(fields: [userId], references: [id])
   userId    String?
-  concert   Concert? @relation(fields: [concertId], references: [id])
+  concert   Concert?          @relation(fields: [concertId], references: [id])
   concertId String?
-  action    String
-  createdAt DateTime @default(now())
+  action    ActivityLogStatus
+  createdAt DateTime          @default(now())
+
+  @@index([userId])
 }
