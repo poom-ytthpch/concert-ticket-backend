@@ -13,6 +13,7 @@ import { join } from 'path';
 import { UserModule } from './modules/user/user.module';
 import { GqlThrottlerGuard } from './common/guard/gql-throttler.guard';
 import { ConcertsModule } from './modules/concerts/concerts.module';
+import { ReservationsModule } from './modules/reservations/reservations.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ConcertsModule } from './modules/concerts/concerts.module';
     AuthModule,
     UserModule,
     ConcertsModule,
+    ReservationsModule,
   ],
   controllers: [AppController],
   providers: [
