@@ -89,10 +89,6 @@ import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
       provide: APP_GUARD,
       useClass: GqlThrottlerGuard,
     },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-    },
   ],
 })
 export class AppModule {}
