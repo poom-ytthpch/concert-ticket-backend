@@ -3,15 +3,25 @@ import { ConcertsService } from './concerts.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RoleType } from '@prisma/client';
 import { HttpException } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('ConcertsService', () => {
   let service: ConcertsService;
+  let cache: Cache;
+
   let mockPrismaService = {
+    $queryRaw: jest.fn(),
     concert: {
       create: jest.fn(),
       delete: jest.fn(),
       findUnique: jest.fn(),
     },
+  };
+
+  let mockCacheManager: any = {
+    get: jest.fn(),
+    set: jest.fn(),
   };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,10 +31,15 @@ describe('ConcertsService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: CACHE_MANAGER,
+          useValue: mockCacheManager,
+        },
       ],
     }).compile();
 
     service = module.get<ConcertsService>(ConcertsService);
+    cache = module.get(CACHE_MANAGER);
   });
 
   it('should be defined', () => {
@@ -227,6 +242,85 @@ describe('ConcertsService', () => {
       await expect(service.findOne(id)).rejects.toBeInstanceOf(HttpException);
 
       await expect(service.findOne(id)).rejects.toThrow('DB error');
+    });
+  });
+
+  describe('getConcerts', () => {
+    it('should get concerts', async () => {
+      const ctx = {
+        req: { user: { id: 'u1', username: 'test', roles: [RoleType.ADMIN] } },
+      };
+
+      mockCacheManager.get.mockResolvedValueOnce(null);
+
+      mockPrismaService.$queryRaw
+        .mockResolvedValueOnce([
+          { totalSeat: 100n, reserved: 10n, cancelled: 5n },
+        ])
+        .mockResolvedValueOnce([
+          {
+            id: '1',
+            name: 'Concert Name',
+            description: 'Concert Description',
+            totalSeats: 100,
+            seatsAvailable: 90,
+            userReservationStatus: 'RESERVED',
+          },
+        ]);
+
+      const result = await service.getConcerts(ctx as any);
+
+      expect(result).toEqual({
+        summary: { totalSeat: 100, reserved: 10, cancelled: 5 },
+        data: [
+          {
+            id: '1',
+            name: 'Concert Name',
+            description: 'Concert Description',
+            totalSeats: 100,
+            seatsAvailable: 90,
+            userReservationStatus: 'RESERVED',
+          },
+        ],
+      });
+
+      expect(mockCacheManager.set).toHaveBeenCalled();
+    });
+
+    it('should return cached value when cache exists', async () => {
+      const cachedSummary = { totalSeat: 100, reserved: 10, cancelled: 5 };
+      const cachedList = [{ id: '1', name: 'Concert A', seatsAvailable: 50 }];
+
+      mockCacheManager.get
+        .mockResolvedValueOnce(cachedSummary)
+        .mockResolvedValueOnce(cachedList);
+
+      const ctx = {
+        req: { user: { id: 'u1', username: 'test' } },
+      };
+
+      const result = await service.getConcerts(ctx as any);
+
+      expect(result).toEqual({
+        summary: cachedSummary,
+        data: cachedList,
+      });
+    });
+
+    it('should throw HttpException when prisma error occurs', async () => {
+      const ctx = {
+        req: { user: { id: 'u1', username: 'test', roles: [RoleType.ADMIN] } },
+      };
+
+      jest
+        .spyOn(mockPrismaService, '$queryRaw')
+        .mockRejectedValue(new Error('DB error'));
+
+      await expect(service.getConcerts(ctx as any)).rejects.toBeInstanceOf(
+        HttpException,
+      );
+
+      await expect(service.getConcerts(ctx as any)).rejects.toThrow('DB error');
     });
   });
 });

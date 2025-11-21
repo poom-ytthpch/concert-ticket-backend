@@ -82,6 +82,9 @@ export class ConcertsService {
   }
 
   async getConcerts(ctx: GqlContext): Promise<GetConcertsResponse> {
+    let summaryRaw;
+    let concertsRaw;
+
     try {
       const userId = ctx.req.user?.id;
 
@@ -102,11 +105,9 @@ export class ConcertsService {
         };
       }
 
-      let summaryRaw;
-      try {
-        summaryRaw = await this.repos.$queryRaw<
-          [{ totalSeat: bigint; reserved: bigint; cancelled: bigint }]
-        >`
+      summaryRaw = await this.repos.$queryRaw<
+        [{ totalSeat: bigint; reserved: bigint; cancelled: bigint }]
+      >`
         SELECT 
           SUM(c."totalSeats") AS "totalSeat",
           SUM(CASE WHEN r."status" = 'RESERVED' THEN 1 ELSE 0 END) AS "reserved",
@@ -114,14 +115,8 @@ export class ConcertsService {
         FROM "Concert" c
         LEFT JOIN "Reservation" r ON c.id = r."concertId";
       `;
-      } catch (err) {
-        this.logger.error('[getConcerts] Summary query failed', err);
-        throw new HttpException('Failed to fetch summary', 500);
-      }
 
-      let concertsRaw;
-      try {
-        concertsRaw = await this.repos.$queryRaw<ConcertGql[]>`
+      concertsRaw = await this.repos.$queryRaw<ConcertGql[]>`
         SELECT 
           c.*,
           r."status" AS "userReservationStatus"
@@ -131,10 +126,6 @@ export class ConcertsService {
           AND r."userId" = ${userId}
         ORDER BY c."createdAt" DESC;
       `;
-      } catch (err) {
-        this.logger.error('[getConcerts] Concert list query failed', err);
-        throw new HttpException('Failed to fetch concerts list', 500);
-      }
 
       const parsedSummary = {
         totalSeat: Number(summaryRaw[0].totalSeat),
