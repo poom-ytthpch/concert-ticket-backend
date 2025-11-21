@@ -15,6 +15,7 @@ import { GqlThrottlerGuard } from './common/guard/gql-throttler.guard';
 import { ConcertsModule } from './modules/concerts/concerts.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
 import { BullModule } from '@nestjs/bullmq';
+import { ActivityLogModule } from './modules/activity-log/activity-log.module';
 
 @Module({
   imports: [
@@ -54,17 +55,21 @@ import { BullModule } from '@nestjs/bullmq';
         plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
       }),
     }),
-    BullModule.forRoot({
-      connection: {
-        host: 'localhost',
-        port: 6379,
-      },
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST') || 'localhost',
+          port: configService.get<number>('REDIS_PORT') || 6379,
+        },
+      }),
     }),
     PrismaModule,
     AuthModule,
     UserModule,
     ConcertsModule,
     ReservationsModule,
+    ActivityLogModule,
   ],
   controllers: [AppController],
   providers: [
