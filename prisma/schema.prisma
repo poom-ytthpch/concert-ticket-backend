@@ -49,6 +49,7 @@ model Concert {
   updateBy       String?
 
   @@index([name])
+  @@index([createdBy])
 }
 
 model Reservation {
