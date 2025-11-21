@@ -1,3 +1,19 @@
+enum ReservationStatus {
+  PENDING
+  RESERVED
+  FAILED
+  SOLD_OUT
+  CANCELLED
+}
+
+type ReservationsGql {
+  id: String
+  userId: String
+  concertId: String
+  status: ReservationStatus
+  createdAt: Date
+}
+
 input ReserveInput {
   userId: String!
   concertId: String!

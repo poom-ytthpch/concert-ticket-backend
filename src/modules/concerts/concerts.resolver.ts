@@ -1,6 +1,6 @@
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { ConcertsService } from './concerts.service';
-import { CreateConcertInput } from '@/types/gql';
+import { CreateConcertInput, GetConcertsResponse } from '@/types/gql';
 import { GqlContext } from '@/types/gql-context';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '@/common/jwt/jwt-auth-guard';
@@ -26,5 +26,12 @@ export class ConcertsResolver {
   @Mutation('deleteConcert')
   deleteConcert(@Args('id') id: string) {
     return this.concertsService.delete(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Roles(RoleType.USER, RoleType.ADMIN)
+  @Query('getConcerts')
+  getConcerts(@Context() ctx: GqlContext): Promise<GetConcertsResponse> {
+    return this.concertsService.getConcerts(ctx);
   }
 }

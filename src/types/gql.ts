@@ -13,6 +13,14 @@ export enum RoleType {
     USER = "USER"
 }
 
+export enum ReservationStatus {
+    PENDING = "PENDING",
+    RESERVED = "RESERVED",
+    FAILED = "FAILED",
+    SOLD_OUT = "SOLD_OUT",
+    CANCELLED = "CANCELLED"
+}
+
 export class RegisterInput {
     username: string;
     email: string;
@@ -30,7 +38,6 @@ export class CreateConcertInput {
     description?: Nullable<string>;
     totalSeats: number;
     seatsAvailable: number;
-    createdAt?: Nullable<Date>;
 }
 
 export class ReserveInput {
@@ -61,6 +68,8 @@ export class LoginResponse {
 
 export abstract class IQuery {
     abstract _(): Nullable<boolean> | Promise<Nullable<boolean>>;
+
+    abstract getConcerts(): GetConcertsResponse | Promise<GetConcertsResponse>;
 }
 
 export abstract class IMutation {
@@ -77,19 +86,40 @@ export abstract class IMutation {
     abstract cancel(input: CancelInput): Cancelresponse | Promise<Cancelresponse>;
 }
 
-export class Concert {
-    id: string;
+export class ConcertGql {
+    id?: Nullable<string>;
     name?: Nullable<string>;
     description?: Nullable<string>;
     totalSeats?: Nullable<number>;
     seatsAvailable?: Nullable<number>;
     createdAt?: Nullable<Date>;
+    reservations?: Nullable<Nullable<ReservationsGql>[]>;
+    userReservationStatus?: Nullable<ReservationStatus>;
 }
 
 export class CreateConcertResponse {
-    data?: Nullable<Concert>;
+    data?: Nullable<ConcertGql>;
     status?: Nullable<boolean>;
     message?: Nullable<string>;
+}
+
+export class ConcertSummary {
+    totalSeat?: Nullable<number>;
+    reserved?: Nullable<number>;
+    cancelled?: Nullable<number>;
+}
+
+export class GetConcertsResponse {
+    data?: Nullable<Nullable<ConcertGql>[]>;
+    summary?: Nullable<ConcertSummary>;
+}
+
+export class ReservationsGql {
+    id?: Nullable<string>;
+    userId?: Nullable<string>;
+    concertId?: Nullable<string>;
+    status?: Nullable<ReservationStatus>;
+    createdAt?: Nullable<Date>;
 }
 
 export class ReserveResponse {

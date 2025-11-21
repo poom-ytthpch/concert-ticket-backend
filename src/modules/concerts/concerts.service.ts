@@ -1,14 +1,24 @@
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { CreateConcertInput, CreateConcertResponse } from '@/types/gql';
+import {
+  CreateConcertInput,
+  CreateConcertResponse,
+  GetConcertsResponse,
+  ConcertGql,
+} from '@/types/gql';
 import { GqlContext } from '@/types/gql-context';
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { HttpException, Inject, Injectable, Logger } from '@nestjs/common';
 import { Concert } from '@prisma/client';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class ConcertsService {
   private readonly logger = new Logger(ConcertsService.name);
 
-  constructor(private readonly repos: PrismaService) {}
+  constructor(
+    private readonly repos: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   async create(
     input: CreateConcertInput,
@@ -65,6 +75,80 @@ export class ConcertsService {
         },
       });
       return concert as Concert;
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async getConcerts(ctx: GqlContext): Promise<GetConcertsResponse> {
+    try {
+      const userId = ctx.req.user?.id;
+
+      const summaryKey = 'concert_summary';
+      const listKey = `concert_list_user_${userId}`;
+
+      const cachedSummary = await this.cacheManager.get<{
+        totalSeat: number;
+        reserved: number;
+        cancelled: number;
+      }>(summaryKey);
+      const cachedList = await this.cacheManager.get<ConcertGql[]>(listKey);
+
+      if (cachedSummary && cachedList) {
+        return {
+          summary: cachedSummary,
+          data: cachedList,
+        };
+      }
+
+      let summaryRaw;
+      try {
+        summaryRaw = await this.repos.$queryRaw<
+          [{ totalSeat: bigint; reserved: bigint; cancelled: bigint }]
+        >`
+        SELECT 
+          SUM(c."totalSeats") AS "totalSeat",
+          SUM(CASE WHEN r."status" = 'RESERVED' THEN 1 ELSE 0 END) AS "reserved",
+          SUM(CASE WHEN r."status" = 'CANCELLED' THEN 1 ELSE 0 END) AS "cancelled"
+        FROM "Concert" c
+        LEFT JOIN "Reservation" r ON c.id = r."concertId";
+      `;
+      } catch (err) {
+        this.logger.error('[getConcerts] Summary query failed', err);
+        throw new HttpException('Failed to fetch summary', 500);
+      }
+
+      let concertsRaw;
+      try {
+        concertsRaw = await this.repos.$queryRaw<ConcertGql[]>`
+        SELECT 
+          c.*,
+          r."status" AS "userReservationStatus"
+        FROM "Concert" c
+        LEFT JOIN "Reservation" r 
+          ON c.id = r."concertId" 
+          AND r."userId" = ${userId}
+        ORDER BY c."createdAt" DESC;
+      `;
+      } catch (err) {
+        this.logger.error('[getConcerts] Concert list query failed', err);
+        throw new HttpException('Failed to fetch concerts list', 500);
+      }
+
+      const parsedSummary = {
+        totalSeat: Number(summaryRaw[0].totalSeat),
+        reserved: Number(summaryRaw[0].reserved),
+        cancelled: Number(summaryRaw[0].cancelled),
+      };
+
+      await this.cacheManager.set(summaryKey, parsedSummary);
+      await this.cacheManager.set(listKey, concertsRaw);
+
+      return {
+        summary: parsedSummary,
+        data: concertsRaw,
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(error.message, error.status);

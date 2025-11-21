@@ -1,12 +1,14 @@
 scalar Date
 
-type Concert {
-  id: String!
+type ConcertGql {
+  id: String
   name: String
   description: String
   totalSeats: Int
   seatsAvailable: Int
   createdAt: Date
+  reservations: [ReservationsGql]
+  userReservationStatus: ReservationStatus
 }
 
 input CreateConcertInput {
@@ -14,13 +16,27 @@ input CreateConcertInput {
   description: String
   totalSeats: Int!
   seatsAvailable: Int!
-  createdAt: Date
 }
 
 type CreateConcertResponse {
-  data: Concert
+  data: ConcertGql
   status: Boolean
   message: String
+}
+
+type ConcertSummary {
+  totalSeat: Int
+  reserved: Int
+  cancelled: Int
+}
+
+type GetConcertsResponse {
+  data: [ConcertGql]
+  summary: ConcertSummary
+}
+
+type Query {
+  getConcerts: GetConcertsResponse!
 }
 
 type Mutation {
