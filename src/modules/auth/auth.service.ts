@@ -9,6 +9,7 @@ import {
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { GqlContext } from '@/types/gql-context';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -19,7 +20,10 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async register(input: RegisterInput): Promise<RegisterResponse> {
+  async register(
+    input: RegisterInput,
+    ctx: GqlContext,
+  ): Promise<RegisterResponse> {
     try {
       const isUserExist = await this.userService.findByEmail(input.email);
 
@@ -34,6 +38,7 @@ export class AuthService {
           email: input.email,
           password: hashedPassword,
           username: input.username,
+          createdBy: ctx.req.user?.username,
           roles: {
             createMany: {
               data: input.roles.map((role) => ({

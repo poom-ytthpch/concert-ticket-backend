@@ -65,11 +65,20 @@ describe('AuthService', () => {
         roles: [{ id: 'r1', name: 'user' }],
       };
 
+      const ctx = {
+        req: {
+          user: {
+            username: 'testuser',
+            roles: [RoleType.ADMIN],
+          },
+        },
+      };
+
       jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
 
       mockPrismaService.user.create.mockResolvedValue(user);
 
-      const result = await service.register(input);
+      const result = await service.register(input, ctx as any);
 
       expect(result).toEqual({
         status: true,
@@ -85,13 +94,22 @@ describe('AuthService', () => {
         roles: [RoleType.USER, RoleType.ADMIN],
       };
 
+      const ctx = {
+        req: {
+          user: {
+            username: 'testuser',
+            roles: [RoleType.ADMIN],
+          },
+        },
+      };
+
       jest.spyOn(userService, 'findByEmail').mockResolvedValue({
         id: '1',
         email: 'user@example.com',
       } as any);
 
       try {
-        await service.register(input);
+        await service.register(input, ctx as any);
         throw new Error('Expected method to throw.');
       } catch (err) {
         expect(err).toBeInstanceOf(HttpException);
