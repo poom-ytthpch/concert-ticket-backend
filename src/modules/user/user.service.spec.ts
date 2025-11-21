@@ -101,6 +101,7 @@ describe('UserService', () => {
         expect(result).toEqual(fakeUser);
         expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({
           where: { email: '1' },
+          include: { roles: true },
         });
       });
 
