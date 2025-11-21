@@ -119,6 +119,11 @@ export class ReservationsService {
         throw new HttpException('Reservation not found', 404);
       }
 
+      await this.reservationQueue.add('cancel-seat', {
+        reservationId: isReservationExist.id,
+        concertId: isReservationExist.concertId,
+      });
+
       await this.activityLogQueue.add('create-activity-log', {
         userId: input.userId,
         concertId: input.concertId,
