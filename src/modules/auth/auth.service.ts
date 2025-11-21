@@ -27,10 +27,12 @@ export class AuthService {
         throw new HttpException('User already exist', 400);
       }
 
+      const hashedPassword = await bcrypt.hash(input.password, 10);
+
       await this.repos.user.create({
         data: {
           email: input.email,
-          password: input.password,
+          password: hashedPassword,
           username: input.username,
           roles: {
             createMany: {
