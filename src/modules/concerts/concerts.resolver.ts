@@ -24,7 +24,7 @@ export class ConcertsResolver {
   @UseGuards(JwtAuthGuard)
   @Roles(RoleType.ADMIN)
   @Mutation('deleteConcert')
-  deleteConcert(@Args('id') id: string, ctx: GqlContext) {
-    return this.concertsService.delete(id, ctx);
+  deleteConcert(@Args('id') id: string) {
+    return this.concertsService.delete(id);
   }
 }

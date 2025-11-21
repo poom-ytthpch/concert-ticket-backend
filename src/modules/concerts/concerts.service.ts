@@ -33,7 +33,7 @@ export class ConcertsService {
     }
   }
 
-  async delete(id: string, ctx: GqlContext): Promise<Boolean> {
+  async delete(id: string): Promise<Boolean> {
     try {
       const isConcertExist = await this.findOne(id);
 

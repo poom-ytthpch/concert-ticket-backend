@@ -130,7 +130,7 @@ describe('ConcertsService', () => {
         createdBy: ctx.req.user?.username,
       });
 
-      const result = await service.delete(id, ctx as any);
+      const result = await service.delete(id);
 
       expect(result).toEqual(true);
     });
@@ -148,13 +148,9 @@ describe('ConcertsService', () => {
 
       jest.spyOn(service, 'findOne').mockReturnValue(null as any);
 
-      await expect(service.delete(id, ctx as any)).rejects.toBeInstanceOf(
-        HttpException,
-      );
+      await expect(service.delete(id)).rejects.toBeInstanceOf(HttpException);
 
-      await expect(service.delete(id, ctx as any)).rejects.toThrow(
-        'Concert not found',
-      );
+      await expect(service.delete(id)).rejects.toThrow('Concert not found');
     });
 
     it('should throw HttpException when prisma error occurs', async () => {
@@ -174,11 +170,9 @@ describe('ConcertsService', () => {
         .spyOn(mockPrismaService.concert, 'delete')
         .mockRejectedValue(new Error('DB error'));
 
-      await expect(service.delete(id, ctx as any)).rejects.toBeInstanceOf(
-        HttpException,
-      );
+      await expect(service.delete(id)).rejects.toBeInstanceOf(HttpException);
 
-      await expect(service.delete(id, ctx as any)).rejects.toThrow('DB error');
+      await expect(service.delete(id)).rejects.toThrow('DB error');
     });
   });
 
