@@ -55,6 +55,7 @@ export class AuthService {
         message: 'User registered successfully',
       };
     } catch (err) {
+      this.logger.error(err);
       throw new HttpException(err.message, err.status);
     }
   }
@@ -90,6 +91,7 @@ export class AuthService {
         token,
       };
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(error.message, error.status);
     }
   }

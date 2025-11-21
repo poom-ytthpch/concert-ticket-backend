@@ -1,9 +1,11 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(private readonly repos: PrismaService) {}
 
   async findOne(
@@ -20,11 +22,13 @@ export class UserService {
       });
 
       if (!user) {
+        this.logger.error('User not found');
         throw new HttpException('User not found', 404);
       }
 
       return user;
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(error.message, error.status);
     }
   }
@@ -40,6 +44,7 @@ export class UserService {
         },
       });
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(error.message, error.status);
     }
   }

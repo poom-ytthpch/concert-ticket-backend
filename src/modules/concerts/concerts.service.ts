@@ -1,11 +1,13 @@
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateConcertInput, CreateConcertResponse } from '@/types/gql';
 import { GqlContext } from '@/types/gql-context';
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { Concert } from '@prisma/client';
 
 @Injectable()
 export class ConcertsService {
+  private readonly logger = new Logger(ConcertsService.name);
+
   constructor(private readonly repos: PrismaService) {}
 
   async create(
@@ -29,6 +31,7 @@ export class ConcertsService {
         data: createdConcert,
       };
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(error.message, error.status);
     }
   }
@@ -49,6 +52,7 @@ export class ConcertsService {
 
       return true;
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(error.message, error.status);
     }
   }
@@ -62,6 +66,7 @@ export class ConcertsService {
       });
       return concert as Concert;
     } catch (error) {
+      this.logger.error(error);
       throw new HttpException(error.message, error.status);
     }
   }
