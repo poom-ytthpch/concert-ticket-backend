@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { PrismaModule } from 'src/common/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -16,6 +16,7 @@ import { ConcertsModule } from './modules/concerts/concerts.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ActivityLogModule } from './modules/activity-log/activity-log.module';
+import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { ActivityLogModule } from './modules/activity-log/activity-log.module';
         },
       }),
     }),
+    CacheModule.register(),
     PrismaModule,
     AuthModule,
     UserModule,
@@ -77,6 +79,10 @@ import { ActivityLogModule } from './modules/activity-log/activity-log.module';
     {
       provide: APP_GUARD,
       useClass: GqlThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: CacheInterceptor,
     },
   ],
 })
