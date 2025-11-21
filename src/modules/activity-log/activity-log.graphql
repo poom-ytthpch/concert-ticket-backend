@@ -1,0 +1,17 @@
+type ActivityLogGql {
+  id: String
+  user: UserGql
+  userId: String
+  concert: ConcertGql
+  concertId: String
+  createdAt: Date
+}
+
+input ActivityLogsInput {
+  take: Int
+  skip: Int
+}
+
+type Query {
+  activityLogs(input: ActivityLogsInput!): [ActivityLogGql]
+}

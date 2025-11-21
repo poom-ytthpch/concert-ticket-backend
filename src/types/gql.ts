@@ -21,6 +21,11 @@ export enum ReservationStatus {
     CANCELLED = "CANCELLED"
 }
 
+export class ActivityLogsInput {
+    take?: Nullable<number>;
+    skip?: Nullable<number>;
+}
+
 export class RegisterInput {
     username: string;
     email: string;
@@ -55,6 +60,23 @@ export class CommonResponse {
     message: string;
 }
 
+export class ActivityLogGql {
+    id?: Nullable<string>;
+    user?: Nullable<UserGql>;
+    userId?: Nullable<string>;
+    concert?: Nullable<ConcertGql>;
+    concertId?: Nullable<string>;
+    createdAt?: Nullable<Date>;
+}
+
+export abstract class IQuery {
+    abstract activityLogs(input: ActivityLogsInput): Nullable<Nullable<ActivityLogGql>[]> | Promise<Nullable<Nullable<ActivityLogGql>[]>>;
+
+    abstract _(): Nullable<boolean> | Promise<Nullable<boolean>>;
+
+    abstract getConcerts(): GetConcertsResponse | Promise<GetConcertsResponse>;
+}
+
 export class RegisterResponse {
     status: boolean;
     message: string;
@@ -64,12 +86,6 @@ export class LoginResponse {
     status: boolean;
     message: string;
     token?: Nullable<string>;
-}
-
-export abstract class IQuery {
-    abstract _(): Nullable<boolean> | Promise<Nullable<boolean>>;
-
-    abstract getConcerts(): GetConcertsResponse | Promise<GetConcertsResponse>;
 }
 
 export abstract class IMutation {
@@ -130,6 +146,12 @@ export class ReserveResponse {
 export class Cancelresponse {
     status: boolean;
     message: string;
+}
+
+export class UserGql {
+    id?: Nullable<string>;
+    username?: Nullable<string>;
+    email?: Nullable<string>;
 }
 
 type Nullable<T> = T | null;

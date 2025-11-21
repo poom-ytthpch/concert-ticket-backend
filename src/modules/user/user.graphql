@@ -1,0 +1,5 @@
+type UserGql {
+  id: String
+  username: String
+  email: String
+}
