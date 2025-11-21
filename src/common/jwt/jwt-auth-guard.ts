@@ -11,7 +11,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 import { RoleType } from '@prisma/client';
-import { UserService } from 'src/modules/user/user.service';
+import { UserService } from '../../modules/user/user.service';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
