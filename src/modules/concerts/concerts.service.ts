@@ -8,9 +8,9 @@ import {
 import { GqlContext } from '@/types/gql-context';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { HttpException, Inject, Injectable, Logger } from '@nestjs/common';
-import { Concert } from '@prisma/client';
+import { Concert, Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
-
+import { UpdateSeatDto } from './dto/concert.dto';
 @Injectable()
 export class ConcertsService {
   private readonly logger = new Logger(ConcertsService.name);
@@ -140,6 +140,36 @@ export class ConcertsService {
         summary: parsedSummary,
         data: concertsRaw,
       };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async updateSeat(input: UpdateSeatDto) {
+    try {
+      let data: Prisma.ConcertUpdateInput;
+
+      if (input.isReserved) {
+        data = {
+          seatsAvailable: {
+            decrement: 1,
+          },
+        };
+      } else {
+        data = {
+          seatsAvailable: {
+            increment: 1,
+          },
+        };
+      }
+
+      return await this.repos.concert.update({
+        where: {
+          id: input.concertId,
+        },
+        data,
+      });
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(error.message, error.status);
