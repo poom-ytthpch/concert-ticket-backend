@@ -2,7 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { UserService } from '../user/user.service';
-import { LoginInput, RegisterInput, RoleType } from '../../../src/types/gql';
+import {
+  LoginInput,
+  RegisterInput,
+  RegisterUserInput,
+  RoleType,
+} from '../../../src/types/gql';
 import { HttpException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -200,6 +205,76 @@ describe('AuthService', () => {
         expect(err).toBeInstanceOf(HttpException);
         expect(err.message).toBe('Invalid credentials');
         expect(err.status).toBe(401);
+      }
+    });
+  });
+
+  describe('registerUser', () => {
+    it('should register a new user', async () => {
+      const input: RegisterUserInput = {
+        email: 'user@example.com',
+        password: 'password',
+        confirmPassword: 'password',
+        username: 'John Doe',
+      };
+      const user = {
+        id: '1',
+        email: 'user@example.com',
+        roles: [{ id: 'r1', name: 'user' }],
+      };
+
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
+
+      mockPrismaService.user.create.mockResolvedValue(user);
+
+      const result = await service.registerUser(input);
+
+      expect(result).toEqual({
+        status: true,
+        message: 'User registered successfully',
+      });
+    });
+
+    it('should throw an error if user already exists', async () => {
+      const input: RegisterUserInput = {
+        email: 'user@example.com',
+        password: 'password',
+        confirmPassword: 'password',
+        username: 'John Doe',
+      };
+
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue({
+        id: '1',
+        email: 'user@example.com',
+      } as any);
+
+      try {
+        await service.registerUser(input);
+        throw new Error('Expected method to throw.');
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe('User already exist');
+        expect(err.status).toBe(400);
+      }
+    });
+
+    it('should throw an error if password does not match', async () => {
+      const input: RegisterUserInput = {
+        email: 'user@example.com',
+        password: 'password',
+        confirmPassword: 'passwordpassword',
+        username: 'John Doe',
+      };
+
+      jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
+
+      try {
+        await service.registerUser(input);
+        throw new Error('Expected method to throw.');
+      } catch (err) {
+        expect(err).toBeInstanceOf(HttpException);
+        expect(err.message).toBe('Password does not match');
+        expect(err.status).toBe(400);
       }
     });
   });
