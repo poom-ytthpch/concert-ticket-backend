@@ -6,6 +6,7 @@ describe('ReservationsProcessor.process', () => {
   let processor: ReservationsProcessor;
   let mockConcertService: {
     findOne: jest.Mock;
+    updateSeat: jest.Mock;
   };
   let mockReservationsService: {
     updateStatus: jest.Mock;
@@ -14,6 +15,7 @@ describe('ReservationsProcessor.process', () => {
   beforeEach(() => {
     mockConcertService = {
       findOne: jest.fn(),
+      updateSeat: jest.fn(),
     };
 
     mockReservationsService = {
@@ -41,6 +43,7 @@ describe('ReservationsProcessor.process', () => {
       id: 'res-1',
       status: ReservationStatus.RESERVED,
     });
+    expect(mockConcertService.updateSeat).toHaveBeenCalled();
   });
 
   it('should mark reservation as SOLD_OUT when no seats are available', async () => {
@@ -72,6 +75,7 @@ describe('ReservationsProcessor.process', () => {
       id: 'res-3',
       status: 'CANCELLED',
     });
+    expect(mockConcertService.updateSeat).toHaveBeenCalled();
   });
 
   it('should return true and do nothing for unknown job names', async () => {
@@ -84,5 +88,6 @@ describe('ReservationsProcessor.process', () => {
 
     expect(mockConcertService.findOne).not.toHaveBeenCalled();
     expect(mockReservationsService.updateStatus).not.toHaveBeenCalled();
+    expect(mockConcertService.updateSeat).not.toHaveBeenCalled();
   });
 });
