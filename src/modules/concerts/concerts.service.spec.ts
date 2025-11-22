@@ -14,6 +14,7 @@ describe('ConcertsService', () => {
       create: jest.fn(),
       delete: jest.fn(),
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
   };
 
@@ -294,6 +295,77 @@ describe('ConcertsService', () => {
       );
 
       await expect(service.getConcerts(ctx as any)).rejects.toThrow('DB error');
+    });
+  });
+
+  describe('updateSeat', () => {
+    it('should update seats', async () => {
+      mockPrismaService.concert.update.mockResolvedValue({
+        id: '1',
+        name: 'Concert Name',
+        description: 'Concert Description',
+        totalSeats: 100,
+        seatsAvailable: 90,
+      });
+
+      const result = await service.updateSeat({
+        concertId: '1',
+        isReserved: true,
+      } as any);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: '1',
+          name: 'Concert Name',
+          description: 'Concert Description',
+          totalSeats: 100,
+          seatsAvailable: 90,
+        }),
+      );
+    });
+
+    it('should update seats if isReserved is false', async () => {
+      mockPrismaService.concert.update.mockResolvedValue({
+        id: '1',
+        name: 'Concert Name',
+        description: 'Concert Description',
+        totalSeats: 100,
+        seatsAvailable: 90,
+      });
+
+      const result = await service.updateSeat({
+        concertId: '1',
+        isReserved: false,
+      } as any);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: '1',
+          name: 'Concert Name',
+          description: 'Concert Description',
+          totalSeats: 100,
+          seatsAvailable: 90,
+        }),
+      );
+    });
+
+    it('should throw HttpException when prisma error occurs', async () => {
+      const input = {
+        concertId: '1',
+        isReserved: true,
+      };
+
+      jest
+        .spyOn(mockPrismaService.concert, 'update')
+        .mockRejectedValue(new Error('DB error'));
+
+      await expect(service.updateSeat(input as any)).rejects.toBeInstanceOf(
+        HttpException,
+      );
+
+      await expect(service.updateSeat(input as any)).rejects.toThrow(
+        'DB error',
+      );
     });
   });
 });
