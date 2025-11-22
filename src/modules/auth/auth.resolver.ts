@@ -1,6 +1,11 @@
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { RegisterInput, RegisterResponse } from 'src/types/gql';
+import {
+  RegisterInput,
+  RegisterResponse,
+  RegisterUserInput,
+  RegisterUserResponse,
+} from 'src/types/gql';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/common/jwt/jwt-auth-guard';
 import { Roles } from 'src/common/jwt/roles.decorator';
@@ -25,5 +30,12 @@ export class AuthResolver {
   @Mutation('login')
   login(@Args('input') input: RegisterInput): Promise<RegisterResponse> {
     return this.authService.login(input);
+  }
+
+  @Mutation('registerUser')
+  registerUser(
+    @Args('input') input: RegisterUserInput,
+  ): Promise<RegisterUserResponse> {
+    return this.authService.registerUser(input);
   }
 }

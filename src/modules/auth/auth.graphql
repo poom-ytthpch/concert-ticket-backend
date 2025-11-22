@@ -26,11 +26,24 @@ type LoginResponse {
   token: String
 }
 
+input RegisterUserInput {
+  username: String!
+  email: String!
+  password: String!
+  confirmPassword: String!
+}
+
+type RegisterUserResponse {
+  status: Boolean!
+  message: String!
+}
+
 type Query {
   _: Boolean
 }
 
 type Mutation {
+  registerUser(input: RegisterUserInput!): RegisterUserResponse!
   register(input: RegisterInput!): RegisterResponse!
   login(input: LoginInput!): LoginResponse!
 }

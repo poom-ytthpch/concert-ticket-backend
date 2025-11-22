@@ -5,11 +5,14 @@ import {
   LoginResponse,
   RegisterInput,
   RegisterResponse,
+  RegisterUserInput,
+  RegisterUserResponse,
 } from 'src/types/gql';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { GqlContext } from '@/types/gql-context';
+import { RoleType } from '@prisma/client';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -33,6 +36,8 @@ export class AuthService {
 
       const hashedPassword = await bcrypt.hash(input.password, 10);
 
+      const now = new Date();
+
       await this.repos.user.create({
         data: {
           email: input.email,
@@ -43,8 +48,8 @@ export class AuthService {
             createMany: {
               data: input.roles.map((role) => ({
                 type: role,
-                createdAt: new Date(),
-                updatedAt: new Date(),
+                createdAt: now,
+                updatedAt: now,
               })),
             },
           },
@@ -92,6 +97,51 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
+      throw new HttpException(error.message, error.status);
+    }
+  }
+
+  async registerUser(input: RegisterUserInput): Promise<RegisterUserResponse> {
+    try {
+      if (input.password !== input.confirmPassword) {
+        throw new HttpException('Password does not match', 400);
+      }
+
+      const isUserExist = await this.userService.findByEmail(input.email);
+
+      if (isUserExist) {
+        throw new HttpException('User already exist', 400);
+      }
+
+      const hashedPassword = await bcrypt.hash(input.password, 10);
+
+      const now = new Date();
+
+      await this.repos.user.create({
+        data: {
+          email: input.email,
+          password: hashedPassword,
+          username: input.username,
+          roles: {
+            createMany: {
+              data: [
+                {
+                  type: RoleType.USER,
+                  createdAt: now,
+                  updatedAt: now,
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      return {
+        status: true,
+        message: 'User registered successfully',
+      };
+    } catch (error) {
+      this.logger.log(error);
       throw new HttpException(error.message, error.status);
     }
   }

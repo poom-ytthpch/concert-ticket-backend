@@ -38,6 +38,13 @@ export class LoginInput {
     password: string;
 }
 
+export class RegisterUserInput {
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+}
+
 export class CreateConcertInput {
     name: string;
     description?: Nullable<string>;
@@ -88,7 +95,14 @@ export class LoginResponse {
     token?: Nullable<string>;
 }
 
+export class RegisterUserResponse {
+    status: boolean;
+    message: string;
+}
+
 export abstract class IMutation {
+    abstract registerUser(input: RegisterUserInput): RegisterUserResponse | Promise<RegisterUserResponse>;
+
     abstract register(input: RegisterInput): RegisterResponse | Promise<RegisterResponse>;
 
     abstract login(input: LoginInput): LoginResponse | Promise<LoginResponse>;
