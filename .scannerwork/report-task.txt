@@ -1,0 +1,6 @@
+projectKey=CONCERT-TICKET:backend
+serverUrl=http://localhost:9000
+serverVersion=25.4.0.105899
+dashboardUrl=http://localhost:9000/dashboard?id=CONCERT-TICKET%3Abackend
+ceTaskId=0e803dcc-ac1a-4248-ad6f-2e70ec346939
+ceTaskUrl=http://localhost:9000/api/ce/task?id=0e803dcc-ac1a-4248-ad6f-2e70ec346939
