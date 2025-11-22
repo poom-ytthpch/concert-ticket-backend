@@ -6,7 +6,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 describe('UserService', () => {
   let service: UserService;
 
-  let mockPrismaService = {
+  const mockPrismaService = {
     user: {
       findUnique: jest.fn(),
     },
@@ -66,7 +66,7 @@ describe('UserService', () => {
         } catch (err) {
           expect(err).toBeInstanceOf(HttpException);
           expect(err.message).toBe('User not found');
-          expect((err as any).status).toBe(404);
+          expect(err.status).toBe(404);
         }
       });
 
@@ -82,7 +82,7 @@ describe('UserService', () => {
         } catch (err) {
           expect(err).toBeInstanceOf(HttpException);
           expect(err.message).toBe('DB failure');
-          expect((err as any).status).toBe(500);
+          expect(err.status).toBe(500);
         }
       });
     });
@@ -117,7 +117,7 @@ describe('UserService', () => {
         } catch (err) {
           expect(err).toBeInstanceOf(HttpException);
           expect(err.message).toBe('DB failure');
-          expect((err as any).status).toBe(500);
+          expect(err.status).toBe(500);
         }
       });
     });

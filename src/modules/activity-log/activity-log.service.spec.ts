@@ -4,14 +4,11 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { getQueueToken } from '@nestjs/bullmq';
 import { ActivityLogAction } from '@prisma/client';
 import { HttpException } from '@nestjs/common';
-import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('ActivityLogService', () => {
-  let cache: Cache;
-
   let service: ActivityLogService;
-  let mockPrismaService = {
+  const mockPrismaService = {
     activityLog: {
       create: jest.fn(),
       delete: jest.fn(),
@@ -25,7 +22,7 @@ describe('ActivityLogService', () => {
     process: jest.fn(),
   };
 
-  let mockCacheManager: any = {
+  const mockCacheManager: any = {
     get: jest.fn(),
     set: jest.fn(),
   };

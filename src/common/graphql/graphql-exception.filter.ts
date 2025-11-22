@@ -7,6 +7,12 @@ import {
 } from '@nestjs/common';
 import { GqlArgumentsHost } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
+import { Request } from 'express';
+
+interface GqlContext {
+  req: Request;
+  res?: any;
+}
 
 @Catch(HttpException, GraphQLError, Error)
 export class GqlExceptionFilter implements ExceptionFilter {
@@ -14,7 +20,7 @@ export class GqlExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost) {
     const gqlHost = GqlArgumentsHost.create(host);
-    const ctx = gqlHost.getContext();
+    const ctx = gqlHost.getContext<GqlContext>();
     const request = ctx.req;
 
     if (exception instanceof Error) {
@@ -28,13 +34,20 @@ export class GqlExceptionFilter implements ExceptionFilter {
     }
 
     if (exception instanceof HttpException) {
-      const response = exception.getResponse();
+      const response = exception.getResponse() as
+        | string
+        | { message?: string | string[]; error?: string };
+
       const status = exception.getStatus();
 
       const message =
         typeof response === 'string'
           ? response
-          : (response as any).message || (response as any).error || 'Error';
+          : response.message
+            ? Array.isArray(response.message)
+              ? response.message.join(', ')
+              : response.message
+            : response.error || 'Error';
 
       const statusCodeMap: Record<number, string> = {
         400: 'BAD_REQUEST',
@@ -53,7 +66,7 @@ export class GqlExceptionFilter implements ExceptionFilter {
           code: gqlCode,
           timestamp: new Date().toISOString(),
           path:
-            gqlHost.getInfo().fieldName || request.originalUrl || request.url,
+            gqlHost.getInfo()?.fieldName || request.originalUrl || request.url,
         },
       });
     }

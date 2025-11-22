@@ -10,7 +10,6 @@ export class PrismaService
     super({
       log: ['query', 'info', 'warn'],
       errorFormat: 'minimal',
-      
     });
   }
 

@@ -12,6 +12,7 @@ import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 import { RoleType } from '@prisma/client';
 import { UserService } from '../../modules/user/user.service';
+import { GqlContext } from '@/types/gql-context';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -26,7 +27,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   getRequest(context: ExecutionContext) {
     const ctx = GqlExecutionContext.create(context);
-    return ctx.getContext().req;
+    return ctx.getContext<GqlContext>().req;
   }
 
   async canActivate(context: ExecutionContext) {
@@ -37,7 +38,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
-    const token = authorizationHeader.replace('Bearer ', '');
+    const token = authorizationHeader.replace('Bearer ', '') || '';
     const secret = this.config.get<string>('JWT_SECRET');
 
     try {

@@ -46,7 +46,7 @@ export class ConcertsService {
     }
   }
 
-  async delete(id: string): Promise<Boolean> {
+  async delete(id: string): Promise<boolean> {
     try {
       const isConcertExist = await this.findOne(id);
 

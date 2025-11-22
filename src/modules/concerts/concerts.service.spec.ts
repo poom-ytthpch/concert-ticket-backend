@@ -3,14 +3,12 @@ import { ConcertsService } from './concerts.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RoleType } from '@prisma/client';
 import { HttpException } from '@nestjs/common';
-import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 describe('ConcertsService', () => {
   let service: ConcertsService;
-  let cache: Cache;
 
-  let mockPrismaService = {
+  const mockPrismaService = {
     $queryRaw: jest.fn(),
     concert: {
       create: jest.fn(),
@@ -19,7 +17,7 @@ describe('ConcertsService', () => {
     },
   };
 
-  let mockCacheManager: any = {
+  const mockCacheManager: any = {
     get: jest.fn(),
     set: jest.fn(),
   };
@@ -39,7 +37,6 @@ describe('ConcertsService', () => {
     }).compile();
 
     service = module.get<ConcertsService>(ConcertsService);
-    cache = module.get(CACHE_MANAGER);
   });
 
   it('should be defined', () => {
@@ -152,14 +149,6 @@ describe('ConcertsService', () => {
 
     it('should throw HttpException when concert not found', async () => {
       const id = '1';
-      const ctx = {
-        req: {
-          user: {
-            username: 'testuser',
-            roles: [RoleType.ADMIN],
-          },
-        },
-      };
 
       jest.spyOn(service, 'findOne').mockReturnValue(null as any);
 
@@ -170,14 +159,6 @@ describe('ConcertsService', () => {
 
     it('should throw HttpException when prisma error occurs', async () => {
       const id = '1';
-      const ctx = {
-        req: {
-          user: {
-            username: 'testuser',
-            roles: [RoleType.ADMIN],
-          },
-        },
-      };
 
       jest.spyOn(service, 'findOne').mockReturnValue({ id } as any);
 
@@ -226,14 +207,6 @@ describe('ConcertsService', () => {
 
     it('should throw HttpException when prisma error occurs', async () => {
       const id = '1';
-      const ctx = {
-        req: {
-          user: {
-            username: 'testuser',
-            roles: [RoleType.ADMIN],
-          },
-        },
-      };
 
       jest
         .spyOn(mockPrismaService.concert, 'findUnique')
@@ -251,7 +224,7 @@ describe('ConcertsService', () => {
         req: { user: { id: 'u1', username: 'test', roles: [RoleType.ADMIN] } },
       };
 
-      mockCacheManager.get.mockResolvedValueOnce(null);
+      mockCacheManager.get.mockResolvedValue(null);
 
       mockPrismaService.$queryRaw
         .mockResolvedValueOnce([

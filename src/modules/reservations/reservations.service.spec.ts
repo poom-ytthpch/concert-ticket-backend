@@ -7,7 +7,7 @@ import { ReservationStatus } from '@prisma/client';
 
 describe('ReservationsService', () => {
   let service: ReservationsService;
-  let mockPrismaService = {
+  const mockPrismaService = {
     reservation: {
       create: jest.fn(),
       delete: jest.fn(),
@@ -67,13 +67,6 @@ describe('ReservationsService', () => {
     });
 
     it('should throw HttpException when prisma error occurs', async () => {
-      const mockReservation = {
-        id: '1',
-        userId: '1',
-        concertId: '1',
-        status: 'pending',
-      };
-
       jest
         .spyOn(mockPrismaService.reservation, 'findUnique')
         .mockRejectedValue(new Error('DB error'));

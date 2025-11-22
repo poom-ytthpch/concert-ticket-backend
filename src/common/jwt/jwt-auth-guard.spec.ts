@@ -6,13 +6,14 @@ import { JwtAuthGuard } from './jwt-auth-guard';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../../modules/user/user.service';
 
+type PartialGqlExecutionContext = Partial<GqlExecutionContext>;
+
 describe('JwtAuthGuard', () => {
   let guard: JwtAuthGuard;
   let mockJwt: Partial<JwtService>;
   let mockConfig: Partial<ConfigService>;
   let mockReflector: Partial<Reflector>;
   let mockUserService: Partial<UserService>;
-  let createSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockJwt = {
@@ -35,13 +36,11 @@ describe('JwtAuthGuard', () => {
       mockUserService as UserService,
     );
 
-    createSpy = jest
-      .spyOn(GqlExecutionContext, 'create')
-      .mockImplementation((ctx: any) => {
-        return {
-          getContext: () => ({ req: (ctx as any).__req }),
-        } as any;
-      });
+    jest.spyOn(GqlExecutionContext, 'create').mockImplementation((ctx: any) => {
+      return {
+        getContext: () => ({ req: ctx.__req }),
+      } as PartialGqlExecutionContext as GqlExecutionContext;
+    });
   });
 
   afterEach(() => {

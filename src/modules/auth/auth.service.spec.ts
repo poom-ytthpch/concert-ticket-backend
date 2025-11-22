@@ -13,7 +13,7 @@ describe('AuthService', () => {
   let service: AuthService;
   let userService: UserService;
 
-  let mockPrismaService = {
+  const mockPrismaService = {
     user: {
       findUnique: jest.fn(),
       create: jest.fn(),
@@ -114,7 +114,7 @@ describe('AuthService', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(HttpException);
         expect(err.message).toBe('User already exist');
-        expect((err as any).status).toBe(400);
+        expect(err.status).toBe(400);
       }
     });
   });
@@ -154,12 +154,6 @@ describe('AuthService', () => {
         email: 'user@example.com',
         password: 'password',
       };
-      const user = {
-        id: '1',
-        email: 'user@example.com',
-        password: 'password',
-        roles: [{ id: 'r1', name: 'user' }],
-      };
 
       jest.spyOn(userService, 'findByEmail').mockResolvedValue(null);
       (
@@ -175,7 +169,7 @@ describe('AuthService', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(HttpException);
         expect(err.message).toBe('User not found');
-        expect((err as any).status).toBe(404);
+        expect(err.status).toBe(404);
       }
     });
 
@@ -205,7 +199,7 @@ describe('AuthService', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(HttpException);
         expect(err.message).toBe('Invalid credentials');
-        expect((err as any).status).toBe(401);
+        expect(err.status).toBe(401);
       }
     });
   });

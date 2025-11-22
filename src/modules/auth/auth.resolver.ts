@@ -18,7 +18,7 @@ export class AuthResolver {
     @Args('input') input: RegisterInput,
     @Context() ctx: GqlContext,
   ): Promise<RegisterResponse> {
-    return this.authService.register(input,ctx);
+    return this.authService.register(input, ctx);
   }
 
   @Roles(RoleType.USER, RoleType.ADMIN, RoleType.ROOT)

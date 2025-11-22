@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from 'src/common/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -16,7 +16,8 @@ import { ConcertsModule } from './modules/concerts/concerts.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ActivityLogModule } from './modules/activity-log/activity-log.module';
-import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { CacheModule } from '@nestjs/cache-manager';
+import { Request, Response } from 'express';
 
 @Module({
   imports: [
@@ -52,7 +53,10 @@ import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
         validate: false,
         introspection:
           configService.get<string>('NODE_ENV') !== 'production' ? true : false,
-        context: ({ req, res }) => ({ req, res }),
+        context: ({ req, res }: { req: Request; res: Response }) => ({
+          req,
+          res,
+        }),
         plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })],
       }),
     }),
