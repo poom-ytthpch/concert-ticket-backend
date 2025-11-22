@@ -3,9 +3,12 @@ import { Job } from 'bullmq';
 import { ReservationsService } from './reservations.service';
 import { ConcertsService } from '../concerts/concerts.service';
 import { ReservationStatus } from '@prisma/client';
+import { Logger } from '@nestjs/common';
 
 @Processor('reservation')
 export class ReservationsProcessor extends WorkerHost {
+  private readonly logger = new Logger(ReservationsProcessor.name);
+
   constructor(
     private readonly concertService: ConcertsService,
     private readonly reservationsService: ReservationsService,
@@ -15,7 +18,7 @@ export class ReservationsProcessor extends WorkerHost {
 
   async process(job: Job<any>): Promise<any> {
     if (job.name === 'reserve-seat') {
-      console.log('Processing reserve:', job.data);
+      this.logger.log('reserve-seat job', job);
 
       const concert = await this.concertService.findOne(job.data.concertId);
 
@@ -23,6 +26,10 @@ export class ReservationsProcessor extends WorkerHost {
 
       if (concert.seatsAvailable > 0) {
         status = ReservationStatus.RESERVED;
+        await this.concertService.updateSeat({
+          concertId: concert.id,
+          isReserved: true,
+        });
       } else {
         status = ReservationStatus.SOLD_OUT;
       }
@@ -34,11 +41,16 @@ export class ReservationsProcessor extends WorkerHost {
     }
 
     if (job.name === 'cancel-seat') {
-      console.log('Processing cancel:', job.data);
+      this.logger.log('ancel-seat', job);
 
       await this.reservationsService.updateStatus({
         id: job.data.reservationId,
         status: 'CANCELLED',
+      });
+
+      await this.concertService.updateSeat({
+        concertId: job.data.concertId,
+        isReserved: false,
       });
     }
 
