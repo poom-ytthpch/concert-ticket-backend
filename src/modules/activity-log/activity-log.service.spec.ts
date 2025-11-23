@@ -143,11 +143,15 @@ describe('ActivityLogService', () => {
         expect(result).toEqual(dbResult);
         expect(mockPrismaService.activityLog.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
-            where: { userId: '1' },
-            select: expect.any(Object),
             orderBy: { createdAt: 'desc' },
-            take: 5,
+            select: {
+              concert: { select: { name: true } },
+              createdAt: true,
+              user: { select: { username: true } },
+            },
             skip: 0,
+            take: 5,
+            where: { adminId: '1' },
           }),
         );
         expect(mockCacheManager.set).toHaveBeenCalledWith(
