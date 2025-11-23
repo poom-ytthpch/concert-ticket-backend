@@ -12,7 +12,7 @@ export class ActivityLogResolver {
   constructor(private readonly activityLogService: ActivityLogService) {}
 
   @UseGuards(JwtAuthGuard)
-  @Roles(RoleType.ADMIN, RoleType.USER)
+  @Roles(RoleType.ADMIN)
   @Query('activityLogs')
   async activityLogs(
     @Args('input') input: ActivityLogsInput,
