@@ -59,17 +59,20 @@ describe('ActivityLogService', () => {
         userId: '1',
         concertId: '1',
         action: ActivityLogAction.RESERVE,
+        adminId: '1',
       };
 
       mockPrismaService.activityLog.create.mockResolvedValue({
         userId: '1',
         concertId: '1',
         action: ActivityLogAction.RESERVE,
+        adminId: '1',
       } as any);
 
       const result = await service.create(mockCreate);
 
       expect(result).toEqual({
+        adminId: '1',
         userId: '1',
         concertId: '1',
         action: ActivityLogAction.RESERVE,
@@ -81,6 +84,7 @@ describe('ActivityLogService', () => {
         userId: '1',
         concertId: '1',
         action: ActivityLogAction.RESERVE,
+        adminId: '1',
       };
 
       jest

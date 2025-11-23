@@ -4,6 +4,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { getQueueToken } from '@nestjs/bullmq';
 import { HttpException } from '@nestjs/common';
 import { ReservationStatus } from '@prisma/client';
+import { ConcertsService } from '../concerts/concerts.service';
 
 describe('ReservationsService', () => {
   let service: ReservationsService;
@@ -18,6 +19,11 @@ describe('ReservationsService', () => {
   const mockBullQueue: any = {
     add: jest.fn(),
     process: jest.fn(),
+  };
+
+  const mockConcertService = {
+    findOne: jest.fn(),
+    updateSeat: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -35,6 +41,10 @@ describe('ReservationsService', () => {
         {
           provide: getQueueToken('activityLog'),
           useValue: mockBullQueue,
+        },
+        {
+          provide: ConcertsService,
+          useValue: mockConcertService,
         },
       ],
     }).compile();
