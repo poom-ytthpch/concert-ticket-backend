@@ -1,4 +1,3 @@
-
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -7,6 +6,11 @@
 
 /* tslint:disable */
 /* eslint-disable */
+
+export enum ActivityLogAction {
+    RESERVE = "RESERVE",
+    CANCEL = "CANCEL"
+}
 
 export enum RoleType {
     ADMIN = "ADMIN",
@@ -79,6 +83,7 @@ export class ActivityLogGql {
     concert?: Nullable<ConcertGql>;
     concertId?: Nullable<string>;
     createdAt?: Nullable<Date>;
+    action?: Nullable<ActivityLogAction>;
 }
 
 export abstract class IQuery {

@@ -51,6 +51,7 @@ export class ActivityLogService {
         where: { adminId: userId },
         select: {
           createdAt: true,
+          action: true,
           user: {
             select: {
               username: true,
@@ -69,7 +70,7 @@ export class ActivityLogService {
 
       await this.cacheManager.set(cacheKey, activityLogs);
 
-      return activityLogs;
+      return activityLogs as ActivityLogGql[];
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(error.message, error.status);

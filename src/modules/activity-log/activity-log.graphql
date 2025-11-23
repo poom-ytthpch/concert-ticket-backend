@@ -1,3 +1,8 @@
+enum ActivityLogAction {
+  RESERVE
+  CANCEL
+}
+
 type ActivityLogGql {
   id: String
   user: UserGql
@@ -5,6 +10,7 @@ type ActivityLogGql {
   concert: ConcertGql
   concertId: String
   createdAt: Date
+  action: ActivityLogAction
 }
 
 input ActivityLogsInput {

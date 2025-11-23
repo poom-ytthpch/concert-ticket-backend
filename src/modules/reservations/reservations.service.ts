@@ -142,7 +142,9 @@ export class ReservationsService {
         concertId: isReservationExist.concertId,
       });
 
-      const concert = await this.concertsService.findOne(isReservationExist.concertId);
+      const concert = await this.concertsService.findOne(
+        isReservationExist.concertId,
+      );
 
       await this.activityLogQueue.add('create-activity-log', {
         userId: input.userId,

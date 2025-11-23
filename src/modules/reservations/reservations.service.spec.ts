@@ -141,13 +141,6 @@ describe('ReservationsService', () => {
     });
 
     it('should update status', async () => {
-      const mockReservation = {
-        id: '1',
-        userId: '1',
-        concertId: '1',
-        status: 'pending',
-      };
-
       jest.spyOn(service, 'findOneByUserConId').mockReturnValue({
         id: '1',
         status: ReservationStatus.CANCELLED,

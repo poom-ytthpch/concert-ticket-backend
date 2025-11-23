@@ -145,6 +145,7 @@ describe('ActivityLogService', () => {
           expect.objectContaining({
             orderBy: { createdAt: 'desc' },
             select: {
+              action: true,
               concert: { select: { name: true } },
               createdAt: true,
               user: { select: { username: true } },
