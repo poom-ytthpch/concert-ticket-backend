@@ -128,7 +128,8 @@ export class ConcertsService {
       concertsRaw = await this.repos.$queryRaw`
         SELECT 
           c.*,
-          r."status" AS "userReservationStatus"
+          r."status" AS "userReservationStatus",
+          CAST(COUNT(*) OVER() AS INTEGER) AS "total"
         FROM "Concert" c
         
         LEFT JOIN "Reservation" r 
@@ -140,6 +141,8 @@ export class ConcertsService {
         OFFSET ${skip} ;
       `;
 
+      console.dir({ concertsRaw }, { depth: null });
+
       const parsedSummary = {
         totalSeat: Number(summaryRaw[0].totalSeat),
         reserved: Number(summaryRaw[0].reserved),
@@ -150,6 +153,7 @@ export class ConcertsService {
       await this.cacheManager.set(listKey, concertsRaw);
 
       return {
+        total: Number(concertsRaw[0].total),
         summary: parsedSummary,
         data: concertsRaw,
       };
