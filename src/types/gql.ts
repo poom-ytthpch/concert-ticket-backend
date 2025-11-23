@@ -145,6 +145,7 @@ export class ConcertSummary {
 }
 
 export class GetConcertsResponse {
+    total?: Nullable<number>;
     data?: Nullable<Nullable<ConcertGql>[]>;
     summary?: Nullable<ConcertSummary>;
 }

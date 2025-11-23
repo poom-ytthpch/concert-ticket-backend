@@ -7,7 +7,11 @@ import {
 } from '@/types/gql';
 import { InjectQueue } from '@nestjs/bullmq';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { ActivityLogAction, Reservation } from '@prisma/client';
+import {
+  ActivityLogAction,
+  Reservation,
+  ReservationStatus,
+} from '@prisma/client';
 import { Queue } from 'bullmq';
 import { UpdateReservationStatusDto } from './dto/reservations.dto';
 
@@ -47,11 +51,20 @@ export class ReservationsService {
         concertId,
       );
 
-      if (isReservationExist) {
+      if (
+        isReservationExist &&
+        isReservationExist.status !== ReservationStatus.CANCELLED
+      ) {
         throw new HttpException('Reservation already exist', 400);
       }
 
-      const reservation = await this.create(input);
+      let reservation: Reservation;
+
+      if (!isReservationExist) {
+        reservation = await this.create(input);
+      } else {
+        reservation = isReservationExist;
+      }
 
       await this.reservationQueue.add('reserve-seat', {
         reservationId: reservation.id,
