@@ -1,3 +1,4 @@
+
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -48,7 +49,6 @@ export class CreateConcertInput {
     name: string;
     description?: Nullable<string>;
     totalSeats: number;
-    seatsAvailable: number;
 }
 
 export class GetConcertsInput {

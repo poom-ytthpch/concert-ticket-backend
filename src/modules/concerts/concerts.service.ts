@@ -31,7 +31,7 @@ export class ConcertsService {
           name: input.name,
           description: input.description,
           totalSeats: input.totalSeats,
-          seatsAvailable: input.seatsAvailable,
+          seatsAvailable: input.totalSeats,
           createdBy: ctx.req.user?.id,
         },
       });

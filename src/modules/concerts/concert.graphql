@@ -15,7 +15,6 @@ input CreateConcertInput {
   name: String!
   description: String
   totalSeats: Int!
-  seatsAvailable: Int!
 }
 
 type CreateConcertResponse {
