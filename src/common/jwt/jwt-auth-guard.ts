@@ -66,7 +66,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         }
       }
 
-      req.user = decoded.payload;
+      req.user = decoded.payload.userInfo;
       return true;
     } catch (error) {
       console.error('JWT verify failed:', error);
