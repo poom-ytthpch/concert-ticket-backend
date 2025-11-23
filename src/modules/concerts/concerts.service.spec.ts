@@ -4,7 +4,6 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { RoleType } from '@prisma/client';
 import { HttpException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { take } from 'rxjs';
 
 describe('ConcertsService', () => {
   let service: ConcertsService;

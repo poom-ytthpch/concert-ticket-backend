@@ -5,10 +5,6 @@ import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './jwt-auth-guard';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../../modules/user/user.service';
-import { User } from '@prisma/client';
-import { Request, Response } from 'express';
-
-type PartialGqlExecutionContext = Partial<GqlExecutionContext>;
 
 describe('JwtAuthGuard', () => {
   let guard: JwtAuthGuard;
