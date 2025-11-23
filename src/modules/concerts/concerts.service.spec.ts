@@ -4,6 +4,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { RoleType } from '@prisma/client';
 import { HttpException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { take } from 'rxjs';
 
 describe('ConcertsService', () => {
   let service: ConcertsService;
@@ -221,6 +222,8 @@ describe('ConcertsService', () => {
 
   describe('getConcerts', () => {
     it('should get concerts', async () => {
+      const mockInput = {};
+
       const ctx = {
         req: { user: { id: 'u1', username: 'test', roles: [RoleType.ADMIN] } },
       };
@@ -242,7 +245,53 @@ describe('ConcertsService', () => {
           },
         ]);
 
-      const result = await service.getConcerts(ctx as any);
+      const result = await service.getConcerts(mockInput, ctx as any);
+
+      expect(result).toEqual({
+        summary: { totalSeat: 100, reserved: 10, cancelled: 5 },
+        data: [
+          {
+            id: '1',
+            name: 'Concert Name',
+            description: 'Concert Description',
+            totalSeats: 100,
+            seatsAvailable: 90,
+            userReservationStatus: 'RESERVED',
+          },
+        ],
+      });
+
+      expect(mockCacheManager.set).toHaveBeenCalled();
+    });
+
+    it('should get concerts with take and skip', async () => {
+      const mockInput = {
+        take: 10,
+        skip: 0,
+      };
+
+      const ctx = {
+        req: { user: { id: 'u1', username: 'test', roles: [RoleType.ADMIN] } },
+      };
+
+      mockCacheManager.get.mockResolvedValue(null);
+
+      mockPrismaService.$queryRaw
+        .mockResolvedValueOnce([
+          { totalSeat: 100n, reserved: 10n, cancelled: 5n },
+        ])
+        .mockResolvedValueOnce([
+          {
+            id: '1',
+            name: 'Concert Name',
+            description: 'Concert Description',
+            totalSeats: 100,
+            seatsAvailable: 90,
+            userReservationStatus: 'RESERVED',
+          },
+        ]);
+
+      const result = await service.getConcerts(mockInput, ctx as any);
 
       expect(result).toEqual({
         summary: { totalSeat: 100, reserved: 10, cancelled: 5 },
@@ -262,6 +311,11 @@ describe('ConcertsService', () => {
     });
 
     it('should return cached value when cache exists', async () => {
+      const mockInput = {
+        take: 10,
+        skip: 0,
+      };
+
       const cachedSummary = { totalSeat: 100, reserved: 10, cancelled: 5 };
       const cachedList = [{ id: '1', name: 'Concert A', seatsAvailable: 50 }];
 
@@ -273,7 +327,7 @@ describe('ConcertsService', () => {
         req: { user: { id: 'u1', username: 'test' } },
       };
 
-      const result = await service.getConcerts(ctx as any);
+      const result = await service.getConcerts(mockInput, ctx as any);
 
       expect(result).toEqual({
         summary: cachedSummary,
@@ -282,6 +336,11 @@ describe('ConcertsService', () => {
     });
 
     it('should throw HttpException when prisma error occurs', async () => {
+      const mockInput = {
+        take: 10,
+        skip: 0,
+      };
+
       const ctx = {
         req: { user: { id: 'u1', username: 'test', roles: [RoleType.ADMIN] } },
       };
@@ -290,11 +349,13 @@ describe('ConcertsService', () => {
         .spyOn(mockPrismaService, '$queryRaw')
         .mockRejectedValue(new Error('DB error'));
 
-      await expect(service.getConcerts(ctx as any)).rejects.toBeInstanceOf(
-        HttpException,
-      );
+      await expect(
+        service.getConcerts(mockInput, ctx as any),
+      ).rejects.toBeInstanceOf(HttpException);
 
-      await expect(service.getConcerts(ctx as any)).rejects.toThrow('DB error');
+      await expect(service.getConcerts(mockInput, ctx as any)).rejects.toThrow(
+        'DB error',
+      );
     });
   });
 
