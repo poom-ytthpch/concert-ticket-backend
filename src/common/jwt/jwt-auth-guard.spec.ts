@@ -5,6 +5,8 @@ import { Reflector } from '@nestjs/core';
 import { JwtAuthGuard } from './jwt-auth-guard';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../../modules/user/user.service';
+import { User } from '@prisma/client';
+import { Request, Response } from 'express';
 
 type PartialGqlExecutionContext = Partial<GqlExecutionContext>;
 
@@ -16,18 +18,10 @@ describe('JwtAuthGuard', () => {
   let mockUserService: Partial<UserService>;
 
   beforeEach(() => {
-    mockJwt = {
-      verifyAsync: jest.fn(),
-    };
-    mockConfig = {
-      get: jest.fn().mockReturnValue('test-secret'),
-    };
-    mockReflector = {
-      getAllAndOverride: jest.fn().mockReturnValue([]),
-    };
-    mockUserService = {
-      findOne: jest.fn(),
-    };
+    mockJwt = { verifyAsync: jest.fn() };
+    mockConfig = { get: jest.fn().mockReturnValue('test-secret') };
+    mockReflector = { getAllAndOverride: jest.fn().mockReturnValue([]) };
+    mockUserService = { findOne: jest.fn() };
 
     guard = new JwtAuthGuard(
       mockJwt as JwtService,
@@ -36,23 +30,24 @@ describe('JwtAuthGuard', () => {
       mockUserService as UserService,
     );
 
-    jest.spyOn(GqlExecutionContext, 'create').mockImplementation((ctx: any) => {
-      return {
-        getContext: () => ({ req: ctx.__req }),
-      } as PartialGqlExecutionContext as GqlExecutionContext;
-    });
+    jest
+      .spyOn(GqlExecutionContext, 'create')
+      .mockImplementation((context: any) => {
+        return {
+          getContext: () => ({ req: context.__req }),
+        } as unknown as GqlExecutionContext;
+      });
   });
-
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
   function makeContext(req: any, handler = () => {}, clazz = class {}) {
-    const context: Partial<ExecutionContext> = {
+    const context: Partial<ExecutionContext> & { __req?: any } = {
       getHandler: () => handler,
       getClass: <T = any>() => clazz as unknown as Type<T>,
+      __req: req,
     };
-    (context as any).__req = req;
     return context as ExecutionContext;
   }
 
@@ -104,38 +99,50 @@ describe('JwtAuthGuard', () => {
   });
 
   test('returns true and attaches user when token valid and roles satisfied (no required roles)', async () => {
-    const decodedPayload = { userInfo: { id: 'u3' }, another: 'field' };
-    const req: any = { headers: { authorization: 'Bearer validtoken' } };
+    const decodedPayload = { id: 'u3' };
+    const req = {
+      headers: { authorization: 'Bearer validtoken' },
+      user: decodedPayload,
+    };
     const ctx = makeContext(req);
+
     (mockJwt.verifyAsync as jest.Mock).mockResolvedValue({
-      payload: decodedPayload,
+      payload: { userInfo: decodedPayload },
     });
     (mockUserService.findOne as jest.Mock).mockResolvedValue({
       id: 'u3',
       roles: [{ type: 'USER' }],
     });
     (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue([]);
-
     const result = await guard.canActivate(ctx);
     expect(result).toBe(true);
     expect(req.user).toEqual(decodedPayload);
   });
 
-  test('returns true when required roles present and user has matching role', async () => {
-    const decodedPayload = { userInfo: { id: 'u4' } };
-    const req: any = { headers: { authorization: 'Bearer validtoken2' } };
+  test('throws Unauthorized when decoded payload missing userInfo', async () => {
+    const req = { headers: { authorization: 'Bearer tokenNoUserInfo' } };
     const ctx = makeContext(req);
     (mockJwt.verifyAsync as jest.Mock).mockResolvedValue({
-      payload: decodedPayload,
+      payload: {},
+    });
+    (mockUserService.findOne as jest.Mock).mockResolvedValue(null);
+
+    await expect(guard.canActivate(ctx)).rejects.toThrow('Unauthorized');
+    expect(mockUserService.findOne).toHaveBeenCalledWith(undefined);
+  });
+
+  test('throws Unauthorized when user.roles is undefined but roles are required', async () => {
+    const req = { headers: { authorization: 'Bearer tokenRolesUndefined' } };
+    const ctx = makeContext(req);
+    (mockJwt.verifyAsync as jest.Mock).mockResolvedValue({
+      payload: { userInfo: { id: 'u5' } },
     });
     (mockUserService.findOne as jest.Mock).mockResolvedValue({
-      id: 'u4',
-      roles: [{ type: 'ADMIN' }, { type: 'USER' }],
-    });
+      id: 'u5',
+    } as any);
     (mockReflector.getAllAndOverride as jest.Mock).mockReturnValue(['ADMIN']);
 
-    const result = await guard.canActivate(ctx);
-    expect(result).toBe(true);
-    expect(req.user).toEqual(decodedPayload);
+    await expect(guard.canActivate(ctx)).rejects.toThrow('Unauthorized');
+    expect(mockUserService.findOne).toHaveBeenCalledWith('u5');
   });
 });
