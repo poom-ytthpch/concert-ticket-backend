@@ -35,8 +35,13 @@ type GetConcertsResponse {
   summary: ConcertSummary
 }
 
+input GetConcertsInput {
+  take: Int
+  skip: Int
+}
+
 type Query {
-  getConcerts: GetConcertsResponse!
+  getConcerts(input: GetConcertsInput): GetConcertsResponse!
 }
 
 type Mutation {

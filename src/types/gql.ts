@@ -1,3 +1,4 @@
+
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -51,6 +52,11 @@ export class CreateConcertInput {
     seatsAvailable: number;
 }
 
+export class GetConcertsInput {
+    take?: Nullable<number>;
+    skip?: Nullable<number>;
+}
+
 export class ReserveInput {
     userId: string;
     concertId: string;
@@ -80,7 +86,7 @@ export abstract class IQuery {
 
     abstract _(): Nullable<boolean> | Promise<Nullable<boolean>>;
 
-    abstract getConcerts(): GetConcertsResponse | Promise<GetConcertsResponse>;
+    abstract getConcerts(input?: Nullable<GetConcertsInput>): GetConcertsResponse | Promise<GetConcertsResponse>;
 }
 
 export class RegisterResponse {

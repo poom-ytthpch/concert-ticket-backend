@@ -4,6 +4,7 @@ import {
   CreateConcertResponse,
   GetConcertsResponse,
   ConcertGql,
+  GetConcertsInput,
 } from '@/types/gql';
 import { GqlContext } from '@/types/gql-context';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -81,7 +82,12 @@ export class ConcertsService {
     }
   }
 
-  async getConcerts(ctx: GqlContext): Promise<GetConcertsResponse> {
+  async getConcerts(
+    input: GetConcertsInput,
+    ctx: GqlContext,
+  ): Promise<GetConcertsResponse> {
+    const { take = 10, skip = 0 } = input;
+
     let summaryRaw;
     let concertsRaw;
 
@@ -89,7 +95,7 @@ export class ConcertsService {
       const userId = ctx.req.user?.id;
 
       const summaryKey = 'concert_summary';
-      const listKey = `concert_list_user_${userId}`;
+      const listKey = `concert_list_user_${userId}_take_${take}_skip_${skip}`;
 
       const cachedSummary = await this.cacheManager.get<{
         totalSeat: number;
@@ -116,7 +122,7 @@ export class ConcertsService {
         LEFT JOIN "Reservation" r ON c.id = r."concertId";
       `;
 
-      concertsRaw = await this.repos.$queryRaw<ConcertGql[]>`
+       concertsRaw = await this.repos.$queryRaw<ConcertGql[]>`
         SELECT 
           c.*,
           r."status" AS "userReservationStatus"
@@ -124,8 +130,10 @@ export class ConcertsService {
         LEFT JOIN "Reservation" r 
           ON c.id = r."concertId" 
           AND r."userId" = ${userId}
-        ORDER BY c."createdAt" DESC;
-      `;
+        ORDER BY c."createdAt" DESC
+        LIMIT ${take}
+        OFFSET ${skip};
+    `;
 
       const parsedSummary = {
         totalSeat: Number(summaryRaw[0].totalSeat),
