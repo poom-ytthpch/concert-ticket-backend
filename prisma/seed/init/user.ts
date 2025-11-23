@@ -10,6 +10,12 @@ export async function seedUserData(
       password: 'rootpassword',
       roles: [RoleType.ROOT],
     },
+    {
+      email: 'test@test.com',
+      username: 'test',
+      password: '@test',
+      roles: [RoleType.ADMIN, RoleType.USER],
+    },
   ];
 
   console.log('Seeding user data...');
