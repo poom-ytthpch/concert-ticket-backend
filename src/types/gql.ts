@@ -55,6 +55,7 @@ export class CreateConcertInput {
 export class GetConcertsInput {
     take?: Nullable<number>;
     skip?: Nullable<number>;
+    isAdmin: boolean;
 }
 
 export class ReserveInput {

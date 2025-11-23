@@ -38,6 +38,7 @@ type GetConcertsResponse {
 input GetConcertsInput {
   take: Int
   skip: Int
+  isAdmin: Boolean!
 }
 
 type Query {

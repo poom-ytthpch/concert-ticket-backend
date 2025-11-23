@@ -86,7 +86,7 @@ export class ConcertsService {
     input: GetConcertsInput,
     ctx: GqlContext,
   ): Promise<GetConcertsResponse> {
-    const { take = 10, skip = 0 } = input;
+    const { take = 10, skip = 0, isAdmin } = input;
 
     let summaryRaw;
     let concertsRaw;
@@ -94,8 +94,8 @@ export class ConcertsService {
     try {
       const userId = ctx.req.user?.id;
 
-      const summaryKey = 'concert_summary';
-      const listKey = `concert_list_user_${userId}_take_${take}_skip_${skip}`;
+      const summaryKey = `concert_summary_${isAdmin ? 'admin' : 'user'}_${userId}`;
+      const listKey = `concert_list_${isAdmin ? 'admin' : 'user'}_${userId}_take_${take}_skip_${skip}`;
 
       const cachedSummary = await this.cacheManager.get<{
         totalSeat: number;
@@ -119,14 +119,16 @@ export class ConcertsService {
           SUM(CASE WHEN r."status" = 'RESERVED' THEN 1 ELSE 0 END) AS "reserved",
           SUM(CASE WHEN r."status" = 'CANCELLED' THEN 1 ELSE 0 END) AS "cancelled"
         FROM "Concert" c
+        ${isAdmin ? '' : 'WHERE c."createdBy" = ${ctx.req.user?.username}'}
         LEFT JOIN "Reservation" r ON c.id = r."concertId";
       `;
 
-       concertsRaw = await this.repos.$queryRaw<ConcertGql[]>`
+      concertsRaw = await this.repos.$queryRaw<ConcertGql[]>`
         SELECT 
           c.*,
           r."status" AS "userReservationStatus"
         FROM "Concert" c
+        ${isAdmin ? '' : 'WHERE c."createdBy" = ${ctx.req.user?.username}'}
         LEFT JOIN "Reservation" r 
           ON c.id = r."concertId" 
           AND r."userId" = ${userId}
