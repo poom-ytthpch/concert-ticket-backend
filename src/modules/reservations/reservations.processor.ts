@@ -5,7 +5,7 @@ import { ConcertsService } from '../concerts/concerts.service';
 import { ReservationStatus } from '@prisma/client';
 import { Logger } from '@nestjs/common';
 
-@Processor('reservation')
+@Processor('reservations')
 export class ReservationsProcessor extends WorkerHost {
   private readonly logger = new Logger(ReservationsProcessor.name);
 

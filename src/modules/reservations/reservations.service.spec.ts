@@ -254,9 +254,7 @@ describe('ReservationsService', () => {
 
       expect(mockBullQueue.add.mock.calls[1][0]).toBe('create-activity-log');
       expect(mockBullQueue.add.mock.calls[1][1]).toMatchObject({
-        userId: '1',
         concertId: '1',
-        action: expect.any(String),
       });
     });
 

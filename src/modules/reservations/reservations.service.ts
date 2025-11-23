@@ -17,8 +17,8 @@ export class ReservationsService {
 
   constructor(
     private readonly repos: PrismaService,
-    @InjectQueue('reservations') private reservationQueue: Queue,
-    @InjectQueue('activityLog') private activityLogQueue: Queue,
+    @InjectQueue('reservations') private readonly reservationQueue: Queue,
+    @InjectQueue('activityLog') private readonly activityLogQueue: Queue,
   ) {}
 
   async findOneByUserConId(userId: string, conId: string) {
