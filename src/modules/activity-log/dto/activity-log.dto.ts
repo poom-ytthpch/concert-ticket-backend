@@ -4,4 +4,5 @@ export class CreateActivityLogDto {
   userId: string;
   concertId: string;
   action: ActivityLogAction;
+  adminId: string;
 }

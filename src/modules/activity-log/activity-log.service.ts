@@ -22,6 +22,7 @@ export class ActivityLogService {
           userId: input.userId,
           concertId: input.concertId,
           action: input.action,
+          adminId: input.adminId,
         },
       });
     } catch (error) {

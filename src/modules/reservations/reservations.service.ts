@@ -14,6 +14,7 @@ import {
 } from '@prisma/client';
 import { Queue } from 'bullmq';
 import { UpdateReservationStatusDto } from './dto/reservations.dto';
+import { ConcertsService } from '../concerts/concerts.service';
 
 @Injectable()
 export class ReservationsService {
@@ -23,6 +24,7 @@ export class ReservationsService {
     private readonly repos: PrismaService,
     @InjectQueue('reservations') private readonly reservationQueue: Queue,
     @InjectQueue('activityLog') private readonly activityLogQueue: Queue,
+    private readonly concertsService: ConcertsService,
   ) {}
 
   async findOneByUserConId(userId: string, conId: string) {
@@ -71,10 +73,13 @@ export class ReservationsService {
         concertId: reservation.concertId,
       });
 
+      const concert = await this.concertsService.findOne(reservation.concertId);
+
       await this.activityLogQueue.add('create-activity-log', {
         userId: reservation.userId,
         concertId: reservation.concertId,
         action: ActivityLogAction.RESERVE,
+        adminId: concert?.createdBy,
       });
 
       return {
@@ -137,10 +142,13 @@ export class ReservationsService {
         concertId: isReservationExist.concertId,
       });
 
+      const concert = await this.concertsService.findOne(isReservationExist.concertId);
+
       await this.activityLogQueue.add('create-activity-log', {
         userId: input.userId,
         concertId: input.concertId,
         action: ActivityLogAction.CANCEL,
+        adminId: concert?.createdBy,
       });
 
       return {

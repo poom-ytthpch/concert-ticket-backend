@@ -19,6 +19,7 @@ export class ActivityLogProcessor extends WorkerHost {
         userId: job.data.userId,
         concertId: job.data.concertId,
         action: job.data.action,
+        adminId: job.data.adminId,
       });
     }
 
