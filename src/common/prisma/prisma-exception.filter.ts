@@ -2,8 +2,6 @@ import {
   Catch,
   ConflictException,
   ExceptionFilter,
-  HttpException,
-  HttpStatus,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
