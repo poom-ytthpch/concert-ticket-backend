@@ -32,7 +32,7 @@ export class ConcertsService {
           description: input.description,
           totalSeats: input.totalSeats,
           seatsAvailable: input.seatsAvailable,
-          createdBy: ctx.req.user?.username,
+          createdBy: ctx.req.user?.id,
         },
       });
 
@@ -111,31 +111,34 @@ export class ConcertsService {
         };
       }
 
-      summaryRaw = await this.repos.$queryRaw<
-        [{ totalSeat: bigint; reserved: bigint; cancelled: bigint }]
-      >`
+      const whereCondition = !isAdmin
+        ? Prisma.sql``
+        : Prisma.sql`WHERE c."createdBy" = ${ctx.req.user?.id}`;
+
+      summaryRaw = await this.repos.$queryRaw`
         SELECT 
           SUM(c."totalSeats") AS "totalSeat",
           SUM(CASE WHEN r."status" = 'RESERVED' THEN 1 ELSE 0 END) AS "reserved",
           SUM(CASE WHEN r."status" = 'CANCELLED' THEN 1 ELSE 0 END) AS "cancelled"
         FROM "Concert" c
-        ${isAdmin ? '' : 'WHERE c."createdBy" = ${ctx.req.user?.username}'}
-        LEFT JOIN "Reservation" r ON c.id = r."concertId";
+        LEFT JOIN "Reservation" r ON c.id = r."concertId"
+        ${whereCondition}
       `;
 
-      concertsRaw = await this.repos.$queryRaw<ConcertGql[]>`
+      concertsRaw = await this.repos.$queryRaw`
         SELECT 
           c.*,
           r."status" AS "userReservationStatus"
         FROM "Concert" c
-        ${isAdmin ? '' : 'WHERE c."createdBy" = ${ctx.req.user?.username}'}
+        
         LEFT JOIN "Reservation" r 
-          ON c.id = r."concertId" 
+          ON c.id = r."concertId"
           AND r."userId" = ${userId}
+        ${whereCondition}
         ORDER BY c."createdAt" DESC
         LIMIT ${take}
-        OFFSET ${skip};
-    `;
+        OFFSET ${skip} ;
+      `;
 
       const parsedSummary = {
         totalSeat: Number(summaryRaw[0].totalSeat),
