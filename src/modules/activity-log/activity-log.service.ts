@@ -48,7 +48,7 @@ export class ActivityLogService {
       }
 
       const activityLogs = await this.repos.activityLog.findMany({
-        where: { userId },
+        where: { adminId: userId },
         select: {
           createdAt: true,
           user: {
