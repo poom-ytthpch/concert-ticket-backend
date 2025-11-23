@@ -118,7 +118,7 @@ export abstract class IMutation {
 
     abstract reserve(input: ReserveInput): ReserveResponse | Promise<ReserveResponse>;
 
-    abstract cancel(input: CancelInput): Cancelresponse | Promise<Cancelresponse>;
+    abstract cancel(input: CancelInput): CancelResponse | Promise<CancelResponse>;
 }
 
 export class ConcertGql {
@@ -162,7 +162,7 @@ export class ReserveResponse {
     message: string;
 }
 
-export class Cancelresponse {
+export class CancelResponse {
     status: boolean;
     message: string;
 }

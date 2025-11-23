@@ -2,7 +2,7 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { ReservationsService } from './reservations.service';
 import {
   CancelInput,
-  Cancelresponse,
+  CancelResponse,
   ReserveInput,
   ReserveResponse,
 } from '@/types/gql';
@@ -17,7 +17,7 @@ export class ReservationsResolver {
   }
 
   @Mutation('cancel')
-  cancel(@Args('input') input: CancelInput): Promise<Cancelresponse> {
+  cancel(@Args('input') input: CancelInput): Promise<CancelResponse> {
     return this.reservationsService.cancel(input);
   }
 }

@@ -29,12 +29,12 @@ input CancelInput {
   concertId: String!
 }
 
-type Cancelresponse {
+type CancelResponse {
   status: Boolean!
   message: String!
 }
 
 type Mutation {
   reserve(input: ReserveInput!): ReserveResponse!
-  cancel(input: CancelInput!): Cancelresponse!
+  cancel(input: CancelInput!): CancelResponse!
 }

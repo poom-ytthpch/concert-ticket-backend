@@ -1,7 +1,7 @@
 import { PrismaService } from '../..//common/prisma/prisma.service';
 import {
   CancelInput,
-  Cancelresponse,
+  CancelResponse,
   ReserveInput,
   ReserveResponse,
 } from '@/types/gql';
@@ -108,7 +108,7 @@ export class ReservationsService {
     }
   }
 
-  async cancel(input: CancelInput): Promise<Cancelresponse> {
+  async cancel(input: CancelInput): Promise<CancelResponse> {
     try {
       const isReservationExist = await this.findOneByUserConId(
         input.userId,
