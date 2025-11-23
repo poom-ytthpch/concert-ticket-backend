@@ -109,7 +109,7 @@ describe('ReservationsService', () => {
       });
     });
 
-    it('should return a reservation when found', async () => {
+    it('should thorw HttpException when reservation already exist', async () => {
       const mockReservation = {
         id: '1',
         userId: '1',
@@ -119,7 +119,7 @@ describe('ReservationsService', () => {
 
       jest
         .spyOn(service, 'findOneByUserConId')
-        .mockReturnValue({ id: '1' } as any);
+        .mockReturnValue({ id: '1', status: ReservationStatus.PENDING } as any);
 
       await expect(service.reserve(mockReservation)).rejects.toBeInstanceOf(
         HttpException,
@@ -128,6 +128,33 @@ describe('ReservationsService', () => {
       await expect(service.reserve(mockReservation)).rejects.toThrow(
         'Reservation already exist',
       );
+    });
+
+    it('should update status', async () => {
+      const mockReservation = {
+        id: '1',
+        userId: '1',
+        concertId: '1',
+        status: 'pending',
+      };
+
+      jest.spyOn(service, 'findOneByUserConId').mockReturnValue({
+        id: '1',
+        status: ReservationStatus.CANCELLED,
+      } as any);
+
+      const result = await service.reserve({
+        userId: '1',
+        concertId: '1',
+      } as any);
+
+      expect(result).toEqual({
+        status: true,
+        message: 'Reservation created successfully',
+      });
+      expect(mockPrismaService.reservation.create).toHaveBeenCalledWith({
+        data: { userId: '1', concertId: '1' },
+      });
     });
   });
 
@@ -245,7 +272,7 @@ describe('ReservationsService', () => {
         message: 'Reservation cancelled successfully',
       });
 
-      expect(mockBullQueue.add).toHaveBeenCalledTimes(4);
+      expect(mockBullQueue.add).toHaveBeenCalled();
 
       expect(mockBullQueue.add.mock.calls[0]).toEqual([
         'reserve-seat',

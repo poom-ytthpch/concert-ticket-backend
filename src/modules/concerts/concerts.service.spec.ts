@@ -241,12 +241,14 @@ describe('ConcertsService', () => {
             totalSeats: 100,
             seatsAvailable: 90,
             userReservationStatus: 'RESERVED',
+            total: 1,
           },
         ]);
 
       const result = await service.getConcerts(mockInput, ctx as any);
 
       expect(result).toEqual({
+        total: 1,
         summary: { totalSeat: 100, reserved: 10, cancelled: 5 },
         data: [
           {
@@ -256,6 +258,7 @@ describe('ConcertsService', () => {
             totalSeats: 100,
             seatsAvailable: 90,
             userReservationStatus: 'RESERVED',
+            total: 1,
           },
         ],
       });
@@ -288,12 +291,14 @@ describe('ConcertsService', () => {
             totalSeats: 100,
             seatsAvailable: 90,
             userReservationStatus: 'RESERVED',
+            total: 1,
           },
         ]);
 
       const result = await service.getConcerts(mockInput, ctx as any);
 
       expect(result).toEqual({
+        total: 1,
         summary: { totalSeat: 100, reserved: 10, cancelled: 5 },
         data: [
           {
@@ -303,6 +308,7 @@ describe('ConcertsService', () => {
             totalSeats: 100,
             seatsAvailable: 90,
             userReservationStatus: 'RESERVED',
+            total: 1,
           },
         ],
       });
@@ -357,12 +363,14 @@ describe('ConcertsService', () => {
             totalSeats: 100,
             seatsAvailable: 90,
             userReservationStatus: 'RESERVED',
+            total: 1,
           },
         ]);
 
       const result = await service.getConcerts(mockInput, ctx as any);
 
       expect(result).toEqual({
+        total: 1,
         summary: { totalSeat: 100, reserved: 10, cancelled: 5 },
         data: [
           {
@@ -372,6 +380,7 @@ describe('ConcertsService', () => {
             totalSeats: 100,
             seatsAvailable: 90,
             userReservationStatus: 'RESERVED',
+            total: 1,
           },
         ],
       });
@@ -404,12 +413,14 @@ describe('ConcertsService', () => {
             totalSeats: 100,
             seatsAvailable: 90,
             userReservationStatus: 'RESERVED',
+            total: 1,
           },
         ]);
 
       const result = await service.getConcerts(mockInput, ctx as any);
 
       expect(result).toEqual({
+        total: 1,
         summary: { totalSeat: 100, reserved: 10, cancelled: 5 },
         data: [
           {
@@ -419,6 +430,7 @@ describe('ConcertsService', () => {
             totalSeats: 100,
             seatsAvailable: 90,
             userReservationStatus: 'RESERVED',
+            total: 1,
           },
         ],
       });
