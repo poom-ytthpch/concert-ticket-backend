@@ -13,11 +13,16 @@ type ActivityLogGql {
   action: ActivityLogAction
 }
 
+type ActivityLogsResponse {
+  total: Int
+  data: [ActivityLogGql]
+}
+
 input ActivityLogsInput {
   take: Int
   skip: Int
 }
 
 type Query {
-  activityLogs(input: ActivityLogsInput!): [ActivityLogGql]
+  activityLogs(input: ActivityLogsInput!): ActivityLogsResponse!
 }

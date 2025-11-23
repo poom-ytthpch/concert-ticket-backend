@@ -1,3 +1,4 @@
+
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -86,8 +87,13 @@ export class ActivityLogGql {
     action?: Nullable<ActivityLogAction>;
 }
 
+export class ActivityLogsResponse {
+    total?: Nullable<number>;
+    data?: Nullable<Nullable<ActivityLogGql>[]>;
+}
+
 export abstract class IQuery {
-    abstract activityLogs(input: ActivityLogsInput): Nullable<Nullable<ActivityLogGql>[]> | Promise<Nullable<Nullable<ActivityLogGql>[]>>;
+    abstract activityLogs(input: ActivityLogsInput): ActivityLogsResponse | Promise<ActivityLogsResponse>;
 
     abstract _(): Nullable<boolean> | Promise<Nullable<boolean>>;
 

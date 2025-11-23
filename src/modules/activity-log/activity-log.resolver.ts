@@ -4,7 +4,11 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '@/common/jwt/jwt-auth-guard';
 import { Roles } from '@/common/jwt/roles.decorator';
 import { RoleType } from '@prisma/client';
-import { ActivityLogGql, ActivityLogsInput } from '@/types/gql';
+import {
+  ActivityLogGql,
+  ActivityLogsInput,
+  ActivityLogsResponse,
+} from '@/types/gql';
 import { GqlContext } from '@/types/gql-context';
 
 @Resolver('ActivityLog')
@@ -17,7 +21,7 @@ export class ActivityLogResolver {
   async activityLogs(
     @Args('input') input: ActivityLogsInput,
     @Context() ctx: GqlContext,
-  ): Promise<ActivityLogGql[]> {
+  ): Promise<ActivityLogsResponse> {
     return await this.activityLogService.findAll(input, ctx);
   }
 }

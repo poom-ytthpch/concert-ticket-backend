@@ -14,6 +14,7 @@ describe('ActivityLogService', () => {
       delete: jest.fn(),
       findUnique: jest.fn(),
       findMany: jest.fn(),
+      count: jest.fn(),
     },
   };
 
@@ -127,20 +128,29 @@ describe('ActivityLogService', () => {
         const ctx = { req: { user: { id: '1' } } } as any;
         const input = { take: 5, skip: 0 } as any;
 
-        const dbResult = [
-          {
-            createdAt: new Date(),
-            user: { username: 'bob' },
-            concert: { name: 'Festival' },
-          },
-        ];
+        const dbResult = {
+          data: [
+            {
+              concert: { name: 'Festival' },
+              createdAt: new Date(),
+              user: { username: 'bob' },
+            },
+          ],
+          total: 1,
+        };
 
+        mockPrismaService.activityLog.count.mockResolvedValueOnce(1);
         mockCacheManager.get.mockResolvedValueOnce(null);
-        mockPrismaService.activityLog.findMany.mockResolvedValueOnce(dbResult);
+        mockPrismaService.activityLog.findMany.mockResolvedValueOnce(
+          dbResult.data,
+        );
 
         const result = await service.findAll(input, ctx);
 
-        expect(result).toEqual(dbResult);
+        expect(result).toEqual({
+          data: dbResult.data,
+          total: dbResult.total,
+        });
         expect(mockPrismaService.activityLog.findMany).toHaveBeenCalledWith(
           expect.objectContaining({
             orderBy: { createdAt: 'desc' },
@@ -148,6 +158,7 @@ describe('ActivityLogService', () => {
               action: true,
               concert: { select: { name: true } },
               createdAt: true,
+              id: true,
               user: { select: { username: true } },
             },
             skip: 0,
@@ -166,6 +177,10 @@ describe('ActivityLogService', () => {
         const input = { take: 5, skip: 0 } as any;
 
         mockCacheManager.get.mockResolvedValueOnce(null);
+
+        mockPrismaService.activityLog.findMany.mockRejectedValue(
+          new Error('DB error'),
+        );
 
         jest
           .spyOn(mockPrismaService.activityLog, 'findMany')
