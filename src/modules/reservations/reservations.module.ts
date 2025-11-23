@@ -5,6 +5,8 @@ import { BullModule } from '@nestjs/bullmq';
 import { ReservationsProcessor } from './reservations.processor';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ConcertsService } from '../concerts/concerts.service';
+import { ActivityLogProcessor } from '../activity-log/activity-log.processor';
+import { ActivityLogService } from '../activity-log/activity-log.service';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { ConcertsService } from '../concerts/concerts.service';
     ReservationsResolver,
     ReservationsService,
     ReservationsProcessor,
+    ActivityLogProcessor,
+    ActivityLogService,
     PrismaService,
     ConcertsService,
   ],
