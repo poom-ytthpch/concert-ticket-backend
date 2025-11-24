@@ -24,6 +24,28 @@
 * [Prisma ORM](https://www.prisma.io/)
 * [Docker](https://www.docker.com/)
 
+## Repository Structure
+
+```
+concert-ticket-backend/
+├─ docker/
+|    ├─ database/
+|    └─ sonarqube/
+├─ prisma/
+|    ├─ migrations/
+|    └─ seed/  
+├─  src/
+|    ├─ common/
+|    ├─ modules/
+|    |    ├─ activity-log/
+|    |    ├─ auth/
+|    |    ├─ concerts/
+|    |    ├─ reservations/
+|    |    └─ user/
+|    └─ types/
+└─ test/                
+```
+
 ## Project setup
 
 ```bash
